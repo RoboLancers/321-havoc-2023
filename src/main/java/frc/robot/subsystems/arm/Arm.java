@@ -3,6 +3,7 @@ package frc.robot.subsystems.arm;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
@@ -16,8 +17,8 @@ public class Arm extends SubsystemBase {
   public CANSparkMax anchorMotor;
   public CANSparkMax floatingMotor;
 
-  public AbsoluteEncoder anchorEncoder;
-  public AbsoluteEncoder floatingEncoder;
+  public RelativeEncoder anchorEncoder;
+  public RelativeEncoder floatingEncoder;
 
   public SparkMaxPIDController anchorPIDController;
   public SparkMaxPIDController floatingPIDController;
@@ -26,12 +27,12 @@ public class Arm extends SubsystemBase {
 
   public Arm() {
     this.anchorMotor = new CANSparkMax(Constants.Arm.Anchor.kAnchorPort, MotorType.kBrushless);
-    this.anchorEncoder = anchorMotor.getAbsoluteEncoder(Type.kDutyCycle);
+    this.anchorEncoder = anchorMotor.getEncoder();
     this.anchorPIDController = this.anchorMotor.getPIDController();
 
     this.floatingMotor =
         new CANSparkMax(Constants.Arm.Floating.kFloatingPort, MotorType.kBrushless);
-    this.floatingEncoder = floatingMotor.getAbsoluteEncoder(Type.kDutyCycle);
+    this.floatingEncoder = floatingMotor.getEncoder();
     this.floatingPIDController = this.floatingMotor.getPIDController();
 
     configureMotors();
@@ -67,13 +68,11 @@ public class Arm extends SubsystemBase {
   }
 
   public void configureEncoders() {
-    anchorEncoder.setPositionConversionFactor(Constants.Arm.Anchor.Conversions.kDegPerRot);
-    anchorEncoder.setVelocityConversionFactor(Constants.Arm.Anchor.Conversions.kDistPerRot);
-    anchorEncoder.setZeroOffset(Constants.Arm.Anchor.kZeroPosition);
+    anchorEncoder.setPositionConversionFactor(Constants.Arm.Anchor.Conversions.kRatio);
+    anchorEncoder.setPosition(Constants.Arm.Anchor.kZeroPosition);
 
-    floatingEncoder.setPositionConversionFactor(Constants.Arm.Floating.Conversions.kDegPerRot);
-    floatingEncoder.setVelocityConversionFactor(Constants.Arm.Floating.Conversions.kDistPerRot);
-    floatingEncoder.setZeroOffset(Constants.Arm.Floating.kZeroPosition);
+    floatingEncoder.setPositionConversionFactor(Constants.Arm.Floating.Conversions.kRatio);
+    floatingEncoder.setPosition(Constants.Arm.Floating.kZeroPosition);
 
     // determine velocity by delta(x)/delta(t)
   }
