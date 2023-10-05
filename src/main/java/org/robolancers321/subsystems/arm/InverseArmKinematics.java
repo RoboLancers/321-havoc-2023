@@ -1,8 +1,8 @@
 /* (C) Robolancers 2024 */
-package frc.robot.subsystems.arm;
+package org.robolancers321.subsystems.arm;
 
-import frc.robot.Constants;
-import frc.robot.util.RelativePlane;
+import org.robolancers321.Constants;
+import org.robolancers321.util.RelativePlane;
 
 public class InverseArmKinematics {
 

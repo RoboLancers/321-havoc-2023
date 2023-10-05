@@ -1,13 +1,15 @@
 /* (C) Robolancers 2024 */
-package frc.robot;
+package org.robolancers321;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
+import java.io.FileNotFoundException;
+import org.robolancers321.commands.Autos;
+import org.robolancers321.commands.ExampleCommand;
+import org.robolancers321.subsystems.ExampleSubsystem;
+import org.robolancers321.util.VersionLoader;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -21,12 +23,24 @@ public class RobotContainer {
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+      new CommandXboxController(Constants.OperatorConstants.kDriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+
+    // Display versioning info on SmartDashboard
+
+    try {
+      String versionData = new VersionLoader().getVersionData().toString();
+      System.out.println(versionData);
+      SmartDashboard.putString("VERSION_DATA", versionData);
+
+    } catch (FileNotFoundException ex) {
+      System.out.println("VERSIONING FILE NOT FOUND");
+      SmartDashboard.putString("VERSION_DATA", "VERSIONING FILE NOT FOUND");
+    }
   }
 
   /**

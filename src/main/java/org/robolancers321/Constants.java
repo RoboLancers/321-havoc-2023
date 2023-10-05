@@ -1,5 +1,5 @@
 /* (C) Robolancers 2024 */
-package frc.robot;
+package org.robolancers321;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;

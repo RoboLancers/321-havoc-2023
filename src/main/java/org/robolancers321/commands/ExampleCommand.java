@@ -1,8 +1,8 @@
 /* (C) Robolancers 2024 */
-package frc.robot.commands;
+package org.robolancers321.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.ExampleSubsystem;
+import org.robolancers321.subsystems.ExampleSubsystem;
 
 /** An example command that uses an example subsystem. */
 public class ExampleCommand extends CommandBase {

@@ -1,5 +1,5 @@
 /* (C) Robolancers 2024 */
-package frc.robot.subsystems.arm;
+package org.robolancers321.subsystems.arm;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
@@ -10,7 +10,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import org.robolancers321.Constants;
 
 public class Arm extends SubsystemBase {
   public CANSparkMax anchorMotor;
