@@ -16,7 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SwerveModule {
-  public final String id;
+  private final String id;
 
   private final CANSparkMax driveMotor;
   private final CANSparkMax turnMotor;
@@ -26,6 +26,8 @@ public class SwerveModule {
 
   private final SparkMaxPIDController driveController;
   private final PIDController turnController;
+
+  private SwerveModuleState desiredState;
 
   public SwerveModule(ModuleConfig config) {
     this.id = config.id;
@@ -44,34 +46,32 @@ public class SwerveModule {
     configControllers();
   }
 
-  public void updateTurnOutput() {
-    final var output = turnController.calculate(turnEncoder.getAbsolutePosition());
-
-    SmartDashboard.putNumber(id + " output", output);
-    SmartDashboard.putNumber(id + " setpoint", turnController.getSetpoint());
+  public void periodic() {
+    SmartDashboard.putNumber(id + " currVeloMetersPerSecond", getState().speedMetersPerSecond);
 
     SmartDashboard.putNumber(
         id + " currAngleDeg",
-        Rotation2d.fromRadians(turnEncoder.getAbsolutePosition()).getDegrees());
+        getState().angle.getDegrees());
 
-    turnMotor.set(-MathUtil.clamp(output, -1.0, 1.0));
+    SmartDashboard.putNumber(id + " targVeloMetersPerSecond", desiredState.speedMetersPerSecond);
+    SmartDashboard.putNumber(id + " targAngleDeg", desiredState.angle.getDegrees());
+
+    final double turnOutput = turnController.calculate(turnEncoder.getAbsolutePosition());
+    turnMotor.set(-MathUtil.clamp(turnOutput, -1.0, 1.0));
   }
 
   public void setDesiredState(SwerveModuleState state) {
-    final var optimizedState =
-        SwerveModuleState.optimize(state, new Rotation2d(turnEncoder.getAbsolutePosition()));
+    final var optimizedState = SwerveModuleState.optimize(state, new Rotation2d(turnEncoder.getAbsolutePosition()));
 
-    // optimizedState.speedMetersPerSecond *= state.angle.minus(getState().angle).getCos();
-
-    SmartDashboard.putNumber(
-        id + " targetVeloSetpointMetersPerSecond", optimizedState.speedMetersPerSecond);
-    SmartDashboard.putNumber(id + " currVeloMetersPerSecond", getState().speedMetersPerSecond);
+    // addresses skew/drift at the module level
+    // optimizedState.speedMetersPerSecond *=
+    // state.angle.minus(getState().angle).getCos();
 
     driveController.setReference(
         optimizedState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
     turnController.setSetpoint(optimizedState.angle.getRadians());
 
-    SmartDashboard.putNumber(id + " targetAngleDeg", optimizedState.angle.getDegrees());
+    this.desiredState = optimizedState;
   }
 
   public void setDrivePIDFCoeffs(double p, double i, double d, double f) {

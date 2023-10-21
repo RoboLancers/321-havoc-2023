@@ -1,12 +1,10 @@
 /* (C) Robolancers 2024 */
 package frc.robot.subsystems.swerve;
 
-import static frc.robot.Constants.Swerve.*;
-import static frc.robot.Constants.OperatorConstants.*;
+import static frc.robot.Constants.Swerve.kMaxSpeedMetersPerSecond;
+import static frc.robot.Constants.Swerve.kSwerveKinematics;
 
 import com.kauailabs.navx.frc.AHRS;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -17,138 +15,129 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.ChassisSpeedsUtil;
-
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 
 public class Swerve extends SubsystemBase {
-	private final Field2d field;
-	private final List<SwerveModule> modules;
+  private final Field2d field;
+  private final List<SwerveModule> modules;
 
-	private final AHRS gyro;
+  private final AHRS gyro;
 
-	private final SwerveDrivePoseEstimator poseEstimator;
+  private final SwerveDrivePoseEstimator poseEstimator;
 
-	public Swerve(
-			SwerveModule frontLeft,
-			SwerveModule frontRight,
-			SwerveModule backLeft,
-			SwerveModule backRight,
-			AHRS gyro,
-			Field2d field) {
-		this.modules = List.of(frontLeft, frontRight, backLeft, backRight);
+  public Swerve(
+      SwerveModule frontLeft,
+      SwerveModule frontRight,
+      SwerveModule backLeft,
+      SwerveModule backRight,
+      AHRS gyro,
+      Field2d field) {
+    this.modules = List.of(frontLeft, frontRight, backLeft, backRight);
 
-		this.gyro = gyro;
-		this.field = field;
+    this.gyro = gyro;
+    this.field = field;
 
-		this.poseEstimator = new SwerveDrivePoseEstimator(
-				kSwerveKinematics, gyro.getRotation2d(), getModulePositions(), new Pose2d());
+    this.poseEstimator =
+        new SwerveDrivePoseEstimator(
+            kSwerveKinematics, gyro.getRotation2d(), getModulePositions(), new Pose2d());
 
-		initModulePIDF();
+    gyro.zeroYaw();
+  }
 
-		gyro.zeroYaw();
-		// gyro.setAngleAdjustment(90);
-	}
+  @Override
+  public void periodic() {
+    this.field.setRobotPose(poseEstimator.update(gyro.getRotation2d(), getModulePositions()));
+    SmartDashboard.putData("Field", this.field);
 
-	@Override
-	public void periodic() {
-		this.field.setRobotPose(poseEstimator.update(gyro.getRotation2d(), getModulePositions()));
-		SmartDashboard.putData("Field", this.field);
+    SmartDashboard.putNumber("yaw", gyro.getRotation2d().getDegrees());
 
-		SmartDashboard.putNumber("yaw", gyro.getRotation2d().getDegrees());
+    modules.forEach(SwerveModule::periodic);
+  }
 
-		modules.forEach(
-			module -> {
-				SmartDashboard.putNumber(module.id + " drive motor position", module.getPosition().distanceMeters);
-				module.setDrivePIDFCoeffs(
-					SmartDashboard.getNumber("kDriveP", Drive.kP),
-					SmartDashboard.getNumber("kDriveI", Drive.kI),
-					SmartDashboard.getNumber("kDriveD", Drive.kD),
-					SmartDashboard.getNumber("kDriveFF", Drive.kFF));
-				module.setTurnPIDCoeffs(
-					SmartDashboard.getNumber("kTurnP", Turn.kP),
-					SmartDashboard.getNumber("kTurnI", Turn.kI),
-					SmartDashboard.getNumber("kTurnD", Turn.kD));
+  public CommandBase driveTeleop(
+      DoubleSupplier throttle,
+      DoubleSupplier strafe,
+      DoubleSupplier turn,
+      boolean fieldCentric,
+      double periodSeconds) {
+    return run(
+        () ->
+            drive(
+                throttle.getAsDouble(),
+                strafe.getAsDouble(),
+                -turn.getAsDouble(),
+                fieldCentric,
+                periodSeconds));
+  }
 
-				module.updateTurnOutput();
-				SmartDashboard.putNumber(
-						module.id + " speedMetersPerSecond", module.getState().speedMetersPerSecond);
-				SmartDashboard.putNumber(module.id + " angleDeg", module.getState().angle.getDegrees());
-			});
-	}
+  public void drive(
+      double inputThrottle,
+      double inputStrafe,
+      double turn,
+      boolean fieldRelative,
+      double periodSeconds) {
+    Translation2d correctedInput =
+		correctDriverInput(inputThrottle, inputStrafe, turn);
+        // CorrectiveTeleop.generateCorrectedInput(inputThrottle, inputStrafe, turn);
 
-	public CommandBase drive(
-		DoubleSupplier throttle,
-		DoubleSupplier strafe,
-		DoubleSupplier turn,
-		boolean fieldCentric,
-		double periodSeconds) {
-		return run(() -> drive(
-			throttle.getAsDouble(),
-			strafe.getAsDouble(),
-			-turn.getAsDouble(),
-			fieldCentric, periodSeconds));
-	}
+    double throttle = correctedInput.getX();
+    double strafe = correctedInput.getY();
 
-	public void setModuleStates(SwerveModuleState state) {
-		setModuleStates(
-				Collections.nCopies(modules.size(), state)
-						.toArray(new SwerveModuleState[modules.size()]));
-	}
+    final var speeds =
+        fieldRelative
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(throttle, strafe, turn, gyro.getRotation2d())
+            : new ChassisSpeeds(throttle, strafe, turn);
 
-	public void setModuleStates(SwerveModuleState[] states) {
-		for (int i = 0; i < modules.size(); i++)
-			modules.get(i).setDesiredState(states[i]);
-	}
+    drive(speeds);
+  }
 
-	public Pose2d getPose() {
-		return this.poseEstimator.getEstimatedPosition();
-	}
+  public void drive(ChassisSpeeds speeds) {
+    final var states = kSwerveKinematics.toSwerveModuleStates(speeds);
 
-	public void resetPose(Pose2d pose) {
-		this.poseEstimator.resetPosition(gyro.getRotation2d(), getModulePositions(), pose);
-	}
+    SwerveDriveKinematics.desaturateWheelSpeeds(states, kMaxSpeedMetersPerSecond);
 
-	public void drive(double inputThrottle, double inputStrafe, double turn, boolean fieldRelative, double periodSeconds) {
-		Translation2d correctedInput = CorrectiveTeleop.generateCorrectedInput(inputThrottle, inputStrafe, turn);
+    setModuleStates(states);
+  }
 
-		double throttle = correctedInput.getX();
-		double strafe = correctedInput.getY();
+  public void setModuleStates(SwerveModuleState[] states) {
+    for (int i = 0; i < modules.size(); i++) modules.get(i).setDesiredState(states[i]);
+  }
 
-		final var speeds =
-			fieldRelative
-				? ChassisSpeeds.fromFieldRelativeSpeeds(throttle, strafe, turn, gyro.getRotation2d())
-				: new ChassisSpeeds(throttle, strafe, turn);
+  public void setModuleStates(SwerveModuleState state) {
+    setModuleStates(
+        Collections.nCopies(modules.size(), state).toArray(new SwerveModuleState[modules.size()]));
+  }
 
-		drive(speeds);
-	}
+  public Pose2d getPose() {
+    return this.poseEstimator.getEstimatedPosition();
+  }
 
-	public void drive(ChassisSpeeds speeds) {
-		final var states = kSwerveKinematics.toSwerveModuleStates(speeds);
+  public void resetPose(Pose2d pose) {
+    this.poseEstimator.resetPosition(gyro.getRotation2d(), getModulePositions(), pose);
+  }
 
-		SwerveDriveKinematics.desaturateWheelSpeeds(states, kMaxSpeedMetersPerSecond);
+  public SwerveModulePosition[] getModulePositions() {
+    return modules.stream().map(SwerveModule::getPosition).toArray(SwerveModulePosition[]::new);
+  }
 
-		setModuleStates(states);
-	}
+  private Translation2d correctDriverInput(
+      double inputThrottle, double inputStrafe, double inputOmega) {
+	final double dt = 0.2;
+    // change in angle over a period of dt assuming constant angular velocity
+    double angularDisplacement = inputOmega * dt;
 
-	public SwerveModulePosition[] getModulePositions() {
-		return modules.stream().map(SwerveModule::getPosition).toArray(SwerveModulePosition[]::new);
-	}
+    // cache the relevant trig
+    double sin = Math.sin(0.5 * angularDisplacement);
+    double cos = Math.cos(0.5 * angularDisplacement);
 
-	private void initModulePIDF() {
-		SmartDashboard.putNumber("kDriveP", Drive.kP);
-		SmartDashboard.putNumber("kDriveI", Drive.kI);
-		SmartDashboard.putNumber("kDriveD", Drive.kD);
-		SmartDashboard.putNumber("kDriveFF", Drive.kFF);
+    // TODO: flip strafe and throttle?
+    // apply pose exponential with small angle approximations
+    double resultantThrottle = inputStrafe * sin + inputThrottle * cos;
+    double resultantStrafe = inputStrafe * cos - inputThrottle * sin;
 
-		SmartDashboard.putNumber("kTurnP", Turn.kP);
-		SmartDashboard.putNumber("kTurnI", Turn.kI);
-		SmartDashboard.putNumber("kTurnD", Turn.kD);
-		SmartDashboard.putNumber("kTurnFF", Turn.kFF);
-	}
+    return new Translation2d(resultantThrottle, resultantStrafe);
+  }
 }

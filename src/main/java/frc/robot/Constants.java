@@ -139,7 +139,7 @@ public final class Constants {
     public static final CANCoderConfiguration kCANCoderConfig = new CANCoderConfiguration();
 
     static {
-      kCANCoderConfig.sensorCoefficient = 7.0 * (180.0) / ((2526.0 + 2967.0) * 150.0);
+      kCANCoderConfig.sensorCoefficient = (2.0 * Math.PI) / (4096.0); // 7.0 * (180.0) / ((2526.0 + 2967.0) * 150.0);
       kCANCoderConfig.unitString = "rad";
       kCANCoderConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
       kCANCoderConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
