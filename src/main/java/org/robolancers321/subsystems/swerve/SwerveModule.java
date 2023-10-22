@@ -1,7 +1,7 @@
 /* (C) Robolancers 2024 */
-package frc.robot.subsystems.swerve;
+package org.robolancers321.subsystems.swerve;
 
-import static frc.robot.Constants.Swerve.*;
+import static org.robolancers321.Constants.Swerve.*;
 
 import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
@@ -59,7 +59,7 @@ public class SwerveModule {
     final double turnOutput = turnController.calculate(turnEncoder.getAbsolutePosition());
     turnMotor.set(-MathUtil.clamp(turnOutput, -1.0, 1.0));
   }
-
+  
   public void setDesiredState(SwerveModuleState state) {
     final var optimizedState = SwerveModuleState.optimize(state, new Rotation2d(turnEncoder.getAbsolutePosition()));
 
@@ -92,7 +92,8 @@ public class SwerveModule {
 
   public SwerveModuleState getState() {
     return new SwerveModuleState(
-        driveEncoder.getVelocity() * kRPMToMetersPerSecond, Rotation2d.fromRadians(turnEncoder.getAbsolutePosition()));
+        driveEncoder.getVelocity() * kRPMToMetersPerSecond,
+        Rotation2d.fromRadians(turnEncoder.getAbsolutePosition()));
   }
 
   private void configMotors(boolean driveIsInverted, boolean turnIsInverted) {
@@ -117,11 +118,16 @@ public class SwerveModule {
     config.magnetOffsetDegrees = magOffsetDeg;
 
     turnEncoder.configAllSettings(config);
-    // driveEncoder.setVelocityConversionFactor(kRPMToMetersPerSecond);
   }
 
   private void configControllers() {
-    setDrivePIDFCoeffs(Drive.kP, Drive.kI, Drive.kD, Drive.kFF);
-    turnController.enableContinuousInput(-Math.PI, Math.PI);
+    this.driveController.setP(Drive.kP);
+    this.driveController.setI(Drive.kI);
+    this.driveController.setD(Drive.kD);
+    this.driveController.setFF(Drive.kFF);
+
+    this.turnController.setPID(Turn.kP, Turn.kI, Turn.kD);
+
+    this.turnController.enableContinuousInput(-Math.PI, Math.PI);
   }
 }

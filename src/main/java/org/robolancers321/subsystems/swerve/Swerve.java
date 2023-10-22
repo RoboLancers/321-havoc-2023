@@ -1,8 +1,7 @@
 /* (C) Robolancers 2024 */
-package frc.robot.subsystems.swerve;
+package org.robolancers321.subsystems.swerve;
 
-import static frc.robot.Constants.Swerve.kMaxSpeedMetersPerSecond;
-import static frc.robot.Constants.Swerve.kSwerveKinematics;
+import static org.robolancers321.Constants.Swerve.*;
 
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -45,43 +44,28 @@ public class Swerve extends SubsystemBase {
             kSwerveKinematics, gyro.getRotation2d(), getModulePositions(), new Pose2d());
 
     gyro.zeroYaw();
+
+    SmartDashboard.putData("Field", this.field);
   }
 
   @Override
   public void periodic() {
     this.field.setRobotPose(poseEstimator.update(gyro.getRotation2d(), getModulePositions()));
-    SmartDashboard.putData("Field", this.field);
-
-    SmartDashboard.putNumber("yaw", gyro.getRotation2d().getDegrees());
 
     modules.forEach(SwerveModule::periodic);
   }
 
   public CommandBase driveTeleop(
-      DoubleSupplier throttle,
-      DoubleSupplier strafe,
-      DoubleSupplier turn,
-      boolean fieldCentric,
-      double periodSeconds) {
+      DoubleSupplier throttle, DoubleSupplier strafe, DoubleSupplier turn, boolean fieldCentric) {
     return run(
         () ->
-            drive(
-                throttle.getAsDouble(),
-                strafe.getAsDouble(),
-                -turn.getAsDouble(),
-                fieldCentric,
-                periodSeconds));
+            drive(throttle.getAsDouble(), strafe.getAsDouble(), -turn.getAsDouble(), fieldCentric));
   }
 
-  public void drive(
-      double inputThrottle,
-      double inputStrafe,
-      double turn,
-      boolean fieldRelative,
-      double periodSeconds) {
+  public void drive(double inputThrottle, double inputStrafe, double turn, boolean fieldRelative) {
     Translation2d correctedInput =
-		correctDriverInput(inputThrottle, inputStrafe, turn);
-        // CorrectiveTeleop.generateCorrectedInput(inputThrottle, inputStrafe, turn);
+      correctDriverInput(inputThrottle, inputStrafe, turn);
+      // CorrectiveTeleop.generateCorrectedInput(inputThrottle, inputStrafe, turn);
 
     double throttle = correctedInput.getX();
     double strafe = correctedInput.getY();
@@ -102,13 +86,13 @@ public class Swerve extends SubsystemBase {
     setModuleStates(states);
   }
 
-  public void setModuleStates(SwerveModuleState[] states) {
-    for (int i = 0; i < modules.size(); i++) modules.get(i).setDesiredState(states[i]);
-  }
-
   public void setModuleStates(SwerveModuleState state) {
     setModuleStates(
         Collections.nCopies(modules.size(), state).toArray(new SwerveModuleState[modules.size()]));
+  }
+
+  public void setModuleStates(SwerveModuleState[] states) {
+    for (int i = 0; i < modules.size(); i++) modules.get(i).setDesiredState(states[i]);
   }
 
   public Pose2d getPose() {

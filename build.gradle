@@ -9,7 +9,7 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
-def ROBOT_MAIN_CLASS = "frc.robot.Main"
+def ROBOT_MAIN_CLASS = "org.robolancers321.Main"
 
 deploy {
     targets {
@@ -37,9 +37,18 @@ wpi.java.debugJni = false
 
 def includeDesktopSupport = true
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
+
+    implementation 'org.yaml:snakeyaml:2.0'
+    implementation 'org.jetbrains:annotations:24.0.0'
+    implementation 'org.jetbrains:annotations:24.0.0'
+
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)

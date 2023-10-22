@@ -1,0 +1,13 @@
+name: Versioning deploys
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  versioning:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: robolancers/lancer-deploy-tool@v2.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

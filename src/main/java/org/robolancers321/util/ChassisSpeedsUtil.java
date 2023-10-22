@@ -1,5 +1,5 @@
 /* (C) Robolancers 2024 */
-package frc.robot.util;
+package org.robolancers321.util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;

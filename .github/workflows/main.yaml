@@ -30,12 +30,31 @@ jobs:
       - name: Check linting (Spotless)
         run: ./gradlew spotlessCheck
 
+  simulate:
+    runs-on: ubuntu-latest
+
+    container: wpilib/roborio-cross-ubuntu:2023-22.04
+
+    steps:
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+
+
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Simulate code
+        run: ./gradlew simulateJava
+
   build:
 
     runs-on: ubuntu-latest
 
     container: wpilib/roborio-cross-ubuntu:2023-22.04
-
 
     steps:
       - uses: actions/checkout@v3
@@ -44,6 +63,9 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Run unit tests
+        run: ./gradlew test
 
       - name: Compile and run tests on robot code
         run: ./gradlew build

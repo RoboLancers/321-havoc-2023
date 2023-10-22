@@ -1,5 +1,5 @@
 /* (C) Robolancers 2024 */
-package frc.robot.subsystems.swerve;
+package org.robolancers321.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -21,7 +21,7 @@ public class CorrectiveTeleop {
     double cos = Math.cos(0.5 * angularDisplacement);
 
     // TODO: flip strafe and throttle?
-    // apply pose exponential with small angle approximations
+    // apply pose exponential with small angle apprximations
     double resultantThrottle = inputStrafe * sin + inputThrottle * cos;
     double resultantStrafe = inputStrafe * cos - inputThrottle * sin;
 
