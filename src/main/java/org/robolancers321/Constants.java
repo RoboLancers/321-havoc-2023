@@ -5,6 +5,9 @@ import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -26,8 +29,13 @@ public final class Constants {
     public static final double kJoystickDeadband = 0.1;
   }
 
-  public static class Arm {
-    public static class Anchor {
+  public static final class Vision {
+    public static final Transform3d kCamOffset =
+        new Transform3d(new Translation3d(0, 0, 0), new Rotation3d(0, 0, 0));
+  }
+
+  public static final class Arm {
+    public static final class Anchor {
       public static final int kAnchorPort = 0;
       public static final int kAnchorEncoderPort = 0;
       public static final boolean kMotorInverted = false;
