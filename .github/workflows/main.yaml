@@ -41,9 +41,6 @@ jobs:
         with:
           fetch-depth: 0
 
-
-
-
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 

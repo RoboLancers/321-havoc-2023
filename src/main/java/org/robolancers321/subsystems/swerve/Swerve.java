@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -18,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.DoubleSupplier;
+import org.robolancers321.subsystems.vision.Vision;
 
 public class Swerve extends SubsystemBase {
   private final Field2d field;
@@ -26,6 +28,8 @@ public class Swerve extends SubsystemBase {
   private final AHRS gyro;
 
   private final SwerveDrivePoseEstimator poseEstimator;
+
+  private final Vision vision;
 
   public Swerve(
       SwerveModule frontLeft,
@@ -38,6 +42,7 @@ public class Swerve extends SubsystemBase {
 
     this.gyro = gyro;
     this.field = field;
+    this.vision = new Vision();
 
     this.poseEstimator =
         new SwerveDrivePoseEstimator(
@@ -49,9 +54,19 @@ public class Swerve extends SubsystemBase {
   @Override
   public void periodic() {
     this.field.setRobotPose(poseEstimator.update(gyro.getRotation2d(), getModulePositions()));
+
+    var visionPoseEstimate = vision.getEstimatedGlobalPose();
+
+    visionPoseEstimate.ifPresent(
+        (estimate) -> {
+          var stdDevs = vision.getEstimationStdDevs(estimate.estimatedPose.toPose2d());
+          this.poseEstimator.addVisionMeasurement(
+              estimate.estimatedPose.toPose2d(), Timer.getFPGATimestamp(), stdDevs);
+        });
+
     SmartDashboard.putData("Field", this.field);
 
-    modules.forEach(module -> module.updateTurnOutput());
+    modules.forEach(SwerveModule::updateTurnOutput);
   }
 
   public CommandBase drive(
