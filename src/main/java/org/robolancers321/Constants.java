@@ -1,15 +1,20 @@
 /* (C) Robolancers 2024 */
 package org.robolancers321;
 
+import static edu.wpi.first.math.VecBuilder.*;
+
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import org.robolancers321.subsystems.arm.InverseArmKinematics;
@@ -32,6 +37,12 @@ public final class Constants {
   public static final class Vision {
     public static final Transform3d kCamOffset =
         new Transform3d(new Translation3d(0, 0, 0), new Rotation3d(0, 0, 0));
+    public static final double kCamPitch = 0.0;
+
+    // The standard deviations of our vision estimated poses, which affect correction rate
+    // (Fake values. Experiment and determine estimation noise on an actual robot.)
+    public static final Matrix<N3, N1> kSingleTagStdDevs = fill(4, 4, 8);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = fill(0.5, 0.5, 1);
   }
 
   public static final class Arm {
