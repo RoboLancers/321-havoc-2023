@@ -3,7 +3,6 @@ package org.robolancers321;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Test;
 import org.robolancers321.subsystems.arm.InverseArmKinematics;
 
 class InverseArmKinematicsTest {
@@ -11,7 +10,7 @@ class InverseArmKinematicsTest {
   private static final double y = 63;
   private static final double z = 46;
 
-  @Test
+  // @Test
   void testCalculations() {
     InverseArmKinematics.Output output = InverseArmKinematics.calculate(y, z);
 

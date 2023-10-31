@@ -4,6 +4,7 @@ package org.robolancers321;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.pathplanner.lib.auto.PIDConstants;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -140,15 +141,27 @@ public final class Constants {
       }
     }
 
-    public static final ModuleConfig frontLeft =
-        new ModuleConfig("FrontLeft", 19, 18, 3, 58.87907200420464, true, false);
-    public static final ModuleConfig frontRight =
-        new ModuleConfig("FrontRight", 11, 10, 1, -128.44749934250595, true, false);
-    public static final ModuleConfig backLeft =
-        new ModuleConfig("BackLeft", 3, 2, 2, 107.41925934100429, true, false);
-    public static final ModuleConfig backRight =
-        new ModuleConfig("BackRight", 5, 6, 4, -142.90441434353835, true, false);
-
+    public static final class OffseasonSwerve {
+      public static final ModuleConfig frontLeft =
+          new ModuleConfig("FrontLeft", 19, 18, 3, 58.87907200420464, true, false);
+      public static final ModuleConfig frontRight =
+          new ModuleConfig("FrontRight", 11, 10, 1, -128.44749934250595, true, false);
+      public static final ModuleConfig backLeft =
+          new ModuleConfig("BackLeft", 3, 2, 2, 107.41925934100429, true, false);
+      public static final ModuleConfig backRight =
+          new ModuleConfig("BackRight", 5, 6, 4, -142.90441434353835, true, false);
+    }
+    public static final class SummerSwerve {
+      public static final ModuleConfig frontLeft =
+          new ModuleConfig("FrontLeft", 2, 9, 10, -38.67179683527642, true, false);
+      public static final ModuleConfig frontRight =
+          new ModuleConfig("FrontRight", 4, 3, 11, -69.08189161938014, true, false);
+      public static final ModuleConfig backLeft =
+          new ModuleConfig("BackLeft", 7, 8, 13, -8.261702051172689, true, false);
+      public static final ModuleConfig backRight =
+          new ModuleConfig("BackRight", 6, 5, 12, -170.59535831198076, false, false);
+    }
+    
     public static final CANCoderConfiguration kCANCoderConfig = new CANCoderConfiguration();
 
     static {
@@ -158,17 +171,21 @@ public final class Constants {
       kCANCoderConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
     }
 
+    // TODO: correct measurements
     public static final double kTrackWidthMeters = Units.inchesToMeters(17.5);
     public static final double kWheelBaseMeters = Units.inchesToMeters(17.5);
 
-    public static final double kWheelRadiusMeters = Units.inchesToMeters(1.5);
-    public static final double kGearRatio = 6.8;
+    public static final double kWheelRadiusMeters = Units.inchesToMeters(2.0); // 1.5);
+    public static final double kDriveGearRatio = 6.12; // 6.8;
+    public static final double kTurnGearRatio = 21.4285714; // 150 / 7
 
-    public static final double kMaxSpeedMetersPerSecond = 4.0;
+    public static final double kMaxSpeedMetersPerSecond =
+        Units.feetToMeters(16) / 1.0; // 4.0; // possibly scale down a bit
     public static final double kMaxOmegaRadiansPerSecond = 1.5 * Math.PI;
 
     public static final double kRPMToMetersPerSecond =
-        2 * Math.PI * kWheelRadiusMeters / (kGearRatio * 60.0);
+        2 * Math.PI * kWheelRadiusMeters / (kDriveGearRatio * 60.0);
+    public static final double kRotationsToRadians = 2 * Math.PI; // / kTurnGearRatio;
 
     public static final SwerveDriveKinematics kSwerveKinematics =
         new SwerveDriveKinematics(
@@ -177,6 +194,9 @@ public final class Constants {
             new Translation2d(-kTrackWidthMeters / 2, kWheelBaseMeters / 2), // back left
             new Translation2d(-kTrackWidthMeters / 2, -kWheelBaseMeters / 2) // back right
             );
+
+    public static final PIDConstants kTranslationConstants = new PIDConstants(0, 0, 0);
+    public static final PIDConstants kRotationConstants = new PIDConstants(0, 0, 0);
 
     public static final class Drive {
       public static final double kP = 0.0;

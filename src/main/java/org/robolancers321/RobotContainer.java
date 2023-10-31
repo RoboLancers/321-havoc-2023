@@ -26,10 +26,10 @@ public class RobotContainer {
 
   private final Swerve swerve =
       new Swerve(
-          new SwerveModule(frontLeft),
-          new SwerveModule(frontRight),
-          new SwerveModule(backLeft),
-          new SwerveModule(backRight),
+          new SwerveModule(SummerSwerve.frontLeft),
+          new SwerveModule(SummerSwerve.frontRight),
+          new SwerveModule(SummerSwerve.backLeft),
+          new SwerveModule(SummerSwerve.backRight),
           gyro,
           field);
 
@@ -37,10 +37,10 @@ public class RobotContainer {
   private final Autos autoPicker = new Autos(swerve, arm, intake);
 
   public RobotContainer() {
-    swerve.setDefaultCommand(swerve.driveTeleop(this::getThrottle, this::getStrafe, this::getTurn, true));
+    swerve.setDefaultCommand(
+        swerve.driveTeleop(this::getThrottle, this::getStrafe, this::getTurn, true));
 
     this.arm.setDefaultCommand(new RunArm(arm));
-
     configureBindings();
   }
 
@@ -63,7 +63,6 @@ public class RobotContainer {
     // SmartDashboard.putBoolean("isCubeMode", isCubeMode);
 
   }
-  ;
 
   public Command getAutonomousCommand() {
     return autoPicker.getAutoChooser().getSelected();

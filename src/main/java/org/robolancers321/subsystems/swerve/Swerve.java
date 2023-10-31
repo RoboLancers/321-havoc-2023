@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.function.DoubleSupplier;
 
 public class Swerve extends SubsystemBase {
-  private final Field2d field;
   private final List<SwerveModule> modules;
 
   private final AHRS gyro;
 
+  private final Field2d field;
   private final SwerveDrivePoseEstimator poseEstimator;
 
   public Swerve(
@@ -51,7 +51,6 @@ public class Swerve extends SubsystemBase {
   @Override
   public void periodic() {
     this.field.setRobotPose(poseEstimator.update(gyro.getRotation2d(), getModulePositions()));
-
     modules.forEach(SwerveModule::periodic);
   }
 
@@ -63,9 +62,8 @@ public class Swerve extends SubsystemBase {
   }
 
   public void drive(double inputThrottle, double inputStrafe, double turn, boolean fieldRelative) {
-    Translation2d correctedInput =
-      correctDriverInput(inputThrottle, inputStrafe, turn);
-      // CorrectiveTeleop.generateCorrectedInput(inputThrottle, inputStrafe, turn);
+    Translation2d correctedInput = correctDriverInput(inputThrottle, inputStrafe, turn);
+    // CorrectiveTeleop.generateCorrectedInput(inputThrottle, inputStrafe, turn);
 
     double throttle = correctedInput.getX();
     double strafe = correctedInput.getY();
@@ -107,9 +105,14 @@ public class Swerve extends SubsystemBase {
     return modules.stream().map(SwerveModule::getPosition).toArray(SwerveModulePosition[]::new);
   }
 
+  public ChassisSpeeds getSpeeds() {
+    return kSwerveKinematics.toChassisSpeeds(
+        modules.stream().map(SwerveModule::getState).toArray(SwerveModuleState[]::new));
+  }
+
   private Translation2d correctDriverInput(
       double inputThrottle, double inputStrafe, double inputOmega) {
-	final double dt = 0.2;
+    final double dt = 0.2;
     // change in angle over a period of dt assuming constant angular velocity
     double angularDisplacement = inputOmega * dt;
 
