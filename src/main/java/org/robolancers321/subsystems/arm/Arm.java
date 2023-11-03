@@ -218,8 +218,13 @@ public class Arm extends SubsystemBase {
     // }
     // return alpha > (85 * Math.PI / 180.0) ? 0 : anchorFF;
 
-    return anchorFF;
 
+    if(alpha > Math.toRadians(110)){
+      return anchorFF;
+    }
+    else{
+      return alpha > Math.toRadians(90) ? 0 : anchorFF;
+    }
     // if(this.getAnchorSetpoint() > 90){
     //   return anchorFF;
     // }

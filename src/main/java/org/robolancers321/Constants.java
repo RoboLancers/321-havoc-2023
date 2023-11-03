@@ -74,7 +74,7 @@ public final class Constants {
       public static double kMaxOutput = 0.2;
       public static double kMinOutput = -0.05; //-0.1
       public static final double kAnchorLength = Units.inchesToMeters(34.5); // in
-      public static final double kTolerance = 5.0;
+      public static final double kTolerance = 7.0;
     }
 
     public static class Floating {
@@ -111,7 +111,7 @@ public final class Constants {
       public static double kMaxOutput = 0.3; // 0.26; //0.26
       public static double kMinOutput = -0.15;
       public static final double kFloatingLength = 1.0 * Units.inchesToMeters(35); // in
-      public static final double kTolerance = 2;
+      public static final double kTolerance = 7.0;
     }
   }
 
@@ -212,11 +212,11 @@ public final class Constants {
      */
 
     // SHELFCONE(100, 15), 
-    SHELFCONE(77, 10), 
-    SHELFCUBE(68.47, 15.34), 
-    MID(82, -3),
-    HIGH(63, 20),
-    CONTRACT(110, -48);
+    SHELFCONE(102, 7.4), // 102, 7.4
+    SHELFCUBE(93.5, 5.5), // 93.5, 5.5
+    MID(86, 346-360), // 86, 346
+    HIGH(60.7, 19.7), // 60.7, 14.7
+    CONTRACT(110, -31);
 
     public final double anchor;
 
@@ -259,7 +259,7 @@ public final class Constants {
   public static class Intake {
     public static final int kPort = 17;
     public static final double kLowVelocity = 1000;
-    public static final double kMaxVelocity = 10000;
+    public static final double kMaxVelocity = 10500;
   }
 
   public static class IntakePID {
