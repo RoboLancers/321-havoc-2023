@@ -4,6 +4,7 @@ package org.robolancers321;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.auto.PIDConstants;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -179,8 +180,8 @@ public final class Constants {
     public static final double kDriveGearRatio = 6.12; // 6.8;
     public static final double kTurnGearRatio = 21.4285714; // 150 / 7
 
-    public static final double kMaxSpeedMetersPerSecond =
-        Units.feetToMeters(16) / 1.0; // 4.0; // possibly scale down a bit
+    public static final double kMaxSpeedMetersPerSecond = 4.0;
+        // Units.feetToMeters(16) / 1.0; // possibly scale down a bit
     public static final double kMaxOmegaRadiansPerSecond = 1.5 * Math.PI;
 
     public static final double kRPMToMetersPerSecond =
@@ -197,6 +198,8 @@ public final class Constants {
 
     public static final PIDConstants kTranslationConstants = new PIDConstants(0, 0, 0);
     public static final PIDConstants kRotationConstants = new PIDConstants(0, 0, 0);
+
+    public static final PathConstraints kDefaultPathConstraints = new PathConstraints(kMaxSpeedMetersPerSecond, 1.0);
 
     public static final class Drive {
       public static final double kP = 0.0;

@@ -5,11 +5,13 @@ import static org.robolancers321.Constants.Swerve.*;
 
 import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -27,7 +29,7 @@ public class SwerveModule {
   private final CANCoder turnAbsEncoder;
 
   private final SparkMaxPIDController driveController;
-  private final SparkMaxPIDController turnController;
+  private final PIDController turnController;
 
   private SwerveModuleState desiredState;
 
@@ -42,8 +44,8 @@ public class SwerveModule {
     this.turnAbsEncoder = new CANCoder(config.kTurnEncoderId);
 
     this.driveController = driveMotor.getPIDController();
-    this.turnController = turnMotor.getPIDController();
-    // new PIDController(Turn.kP, Turn.kI, Turn.kD);
+    this.turnController = // turnMotor.getPIDController();
+      new PIDController(Turn.kP, Turn.kI, Turn.kD);
 
     configMotors(config.driveIsInverted, config.turnIsInverted);
     configEncoders(config.magOffsetDeg);
@@ -61,11 +63,11 @@ public class SwerveModule {
     // TODO: check how well rel. & abs. match up, delete after
     SmartDashboard.putNumber(id + " currAngleDeg (absEncoder)", turnAbsEncoder.getPosition());
 
-    SmartDashboard.putNumber(id + " targVeloMetersPerSecond", desiredState.speedMetersPerSecond);
-    SmartDashboard.putNumber(id + " targAngleDeg", desiredState.angle.getDegrees());
+    SmartDashboard.putNumber(id + " targVeloMetersPerSecond", desiredState != null ? desiredState.speedMetersPerSecond : 0);
+    SmartDashboard.putNumber(id + " targAngleDeg", desiredState != null ? desiredState.angle.getDegrees() : 0);
 
-    // final double turnOutput = turnController.calculate(currState.angle.getRadians());
-    // turnMotor.set(-MathUtil.clamp(turnOutput, -1.0, 1.0));
+    final double turnOutput = turnController.calculate(currState.angle.getRadians());
+    turnMotor.set(-MathUtil.clamp(turnOutput, -1.0, 1.0));
   }
 
   public void setDesiredState(SwerveModuleState state) {
@@ -75,8 +77,8 @@ public class SwerveModule {
         SwerveModuleState.optimize(
             state,
             new Rotation2d(
-                turnRelEncoder.getPosition()
-                // turnAbsEncoder.getAbsolutePosition()
+                // turnRelEncoder.getPosition()
+                turnAbsEncoder.getPosition()
                 ));
 
     // addresses skew/drift at the module level
@@ -85,8 +87,8 @@ public class SwerveModule {
 
     driveController.setReference(
         optimizedState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
-    // turnController.setSetpoint(optimizedState.angle.getRadians());
-    turnController.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
+    turnController.setSetpoint(optimizedState.angle.getRadians());
+    // turnController.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
 
     this.desiredState = optimizedState;
   }
@@ -108,8 +110,8 @@ public class SwerveModule {
     return new SwerveModulePosition(
         driveEncoder.getPosition(),
         Rotation2d.fromRadians(
-            turnRelEncoder.getPosition()
-            // turnAbsEncoder.getAbsolutePosition()
+            // turnRelEncoder.getPosition()
+            turnAbsEncoder.getPosition()
             ));
   }
 
@@ -117,8 +119,8 @@ public class SwerveModule {
     return new SwerveModuleState(
         driveEncoder.getVelocity(), //  * kRPMToMetersPerSecond,
         Rotation2d.fromRadians(
-            turnRelEncoder.getPosition()
-            // turnAbsEncoder.getAbsolutePosition()
+            // turnRelEncoder.getPosition()
+            turnAbsEncoder.getPosition()
             ));
   }
 
@@ -165,11 +167,11 @@ public class SwerveModule {
   private void configControllers() {
     setDrivePIDFCoeffs(Drive.kP, Drive.kI, Drive.kD, Drive.kFF);
     setTurnPIDCoeffs(Turn.kP, Turn.kI, Turn.kD);
-    // this.turnController.enableContinuousInput(-Math.PI, Math.PI);
+    this.turnController.enableContinuousInput(-Math.PI, Math.PI);
 
-    turnController.setPositionPIDWrappingEnabled(true);
-    turnController.setPositionPIDWrappingMinInput(-Math.PI);
-    turnController.setPositionPIDWrappingMaxInput(Math.PI);
+    // turnController.setPositionPIDWrappingEnabled(true);
+    // turnController.setPositionPIDWrappingMinInput(-Math.PI);
+    // turnController.setPositionPIDWrappingMaxInput(Math.PI);
   }
 
   private void burnFlash() {
