@@ -20,9 +20,9 @@ public class ManualMoveAnchor extends CommandBase {
   @Override
   public void execute() {
     if (reverse) {
-      arm.setAnchorSetpoint(arm.getAnchorAngle() - angleOffset);
+      arm.setAnchorGoal(arm.getAnchorAngle() - angleOffset);
     } else {
-      arm.setAnchorSetpoint(arm.getAnchorAngle() - angleOffset);
+      arm.setAnchorGoal(arm.getAnchorAngle() - angleOffset);
     }
   }
 }

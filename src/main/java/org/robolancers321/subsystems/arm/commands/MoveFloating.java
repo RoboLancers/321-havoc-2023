@@ -16,7 +16,7 @@ public class MoveFloating extends CommandBase{
 
     @Override
     public void initialize(){
-        arm.setFloatingSetpoint(setpoint);
+        arm.setFloatingGoal(setpoint);
     }
 
     @Override

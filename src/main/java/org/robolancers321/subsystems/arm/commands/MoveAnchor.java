@@ -16,7 +16,7 @@ public class MoveAnchor extends CommandBase{
 
     @Override
     public void initialize(){
-        arm.setAnchorSetpoint(setpoint);
+        arm.setAnchorGoal(setpoint);
     }
 
     @Override

@@ -36,18 +36,6 @@ public final class Constants {
       public static final int kCurrentLimit = 50; // 40 - 60
       public static final double kGearRatio = 1;
       public static final double kNominalVoltage = 12.0;
-
-      /*
-      velocity from encoder is rotations/s
-      rotations/s * (meters/rotations) = meters/s
-      m/s what we need for motion profile
-
-      RelativeEncoder - 360 deg/gearRatio
-      Invert Motor for correct encoder values. setReference negative for correct output
-
-      AbsoluteEncoder - 360
-      Invert Encoder for correct readings. Change sign of setReference and invert Motor for correct ouputs
-      */
       public static final double kdistancePerRotation = 360;
 
       public static final double kP = 0.01;
@@ -61,8 +49,8 @@ public final class Constants {
       public static final double kA = 0;
       public static ArmFeedforward ANCHOR_FEEDFORWARD = new ArmFeedforward(kS, kG, kV, kA);
 
-      public static final double maxVelocity = 0;
-      public static final double maxAcceleration = 0;
+      public static final double maxVelocity = 10;
+      public static final double maxAcceleration = 10;
       public static TrapezoidProfile.Constraints ANCHOR_CONSTRAINTS =
           new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
 
@@ -73,7 +61,12 @@ public final class Constants {
 
       public static double kMaxOutput = 0.2;
       public static double kMinOutput = -0.05; //-0.1
-      public static final double kAnchorLength = Units.inchesToMeters(34.5); // in
+
+      public static final double kLength = Units.inchesToMeters(34.5); // in
+      public static final double kMass = 0;
+      public static final double kMOI = 0;
+      public static final double kCGRadius = 0;
+
       public static final double kTolerance = 7.0;
     }
 
@@ -82,7 +75,7 @@ public final class Constants {
       public static final boolean kMotorInverted = false;
       public static final boolean kEncoderInverted = false;
       public static final int kCurrentLimit = 40; // 40 - 60
-      public static final double kNominalVoltage = 12.0;
+      public static final double kNominalVoltage = 12;
       public static final double kGearRatio = 25;
       public static final double kdistancePerRotation = 360;
 
@@ -97,8 +90,8 @@ public final class Constants {
       public static final double kA = 0;
       public static ArmFeedforward FLOATING_FEEDFORWARD = new ArmFeedforward(kS, kG, kV, kA);
 
-      public static final double maxVelocity = 40;
-      public static final double maxAcceleration = 60;
+      public static final double maxVelocity = 10;
+      public static final double maxAcceleration = 10;
       public static TrapezoidProfile.Constraints FLOATING_CONSTRAINTS =
           new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
 
@@ -110,7 +103,11 @@ public final class Constants {
 
       public static double kMaxOutput = 0.3; // 0.26; //0.26
       public static double kMinOutput = -0.15;
-      public static final double kFloatingLength = 1.0 * Units.inchesToMeters(35); // in
+      public static final double kLength = Units.inchesToMeters(35); // in
+      public static final double kMass = 0;
+      public static final double kMOI = 0;
+      public static final double kCGRadius = 0;
+
       public static final double kTolerance = 7.0;
     }
   }

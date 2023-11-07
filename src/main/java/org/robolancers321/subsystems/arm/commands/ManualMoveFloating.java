@@ -40,9 +40,9 @@ public class ManualMoveFloating extends CommandBase {
     // arm.setAnchorControllerReference(anchorFF);
     // arm.setFloatingSpeed(floatingFF);
     if (reverse) {
-      arm.setFloatingSetpoint(arm.getFloatingAngle() - angleOffset);
+      arm.setFloatingGoal(arm.getFloatingAngle() - angleOffset);
     } else {
-      arm.setFloatingSetpoint(arm.getFloatingAngle() + angleOffset);
+      arm.setFloatingGoal(arm.getFloatingAngle() + angleOffset);
     }
   }
 
