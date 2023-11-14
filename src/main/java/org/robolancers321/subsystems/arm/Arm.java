@@ -3,6 +3,7 @@ package org.robolancers321.subsystems.arm;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -28,7 +29,7 @@ public class Arm extends SubsystemBase {
   private final CANSparkMax anchorMotor;
   private final CANSparkMax floatingMotor;
 
-  private final AbsoluteEncoder anchorEncoder;
+  private final RelativeEncoder anchorEncoder;
   private final AbsoluteEncoder floatingEncoder;
 
   private final ProfiledPIDController anchorPIDController;
@@ -49,7 +50,7 @@ public class Arm extends SubsystemBase {
 
   public Arm() {
     this.anchorMotor = new CANSparkMax(Constants.Arm.Anchor.kAnchorPort, MotorType.kBrushless);
-    this.anchorEncoder = anchorMotor.getAbsoluteEncoder(Type.kDutyCycle);
+    this.anchorEncoder = anchorMotor.getEncoder();
     this.anchorPIDController =
         new ProfiledPIDController(
             Constants.Arm.Anchor.kP, Constants.Arm.Anchor.kI, Constants.Arm.Anchor.kD, Constants.Arm.Anchor.ANCHOR_CONSTRAINTS);
@@ -121,8 +122,8 @@ public class Arm extends SubsystemBase {
   private void configureEncoders() {
     anchorEncoder.setPositionConversionFactor(Constants.Arm.Anchor.kdistancePerRotation);
     anchorEncoder.setVelocityConversionFactor(Constants.Arm.Anchor.kdistancePerRotation);
-    anchorEncoder.setInverted(Constants.Arm.Anchor.kEncoderInverted);
-    // anchorEncoder.setZeroOffset(Constants.Arm.Anchor.kZeroPosition);
+    // anchorEncoder.setInverted(Constants.Arm.Anchor.kEncoderInverted);
+    anchorEncoder.setPosition(Constants.Arm.Anchor.kZeroPosition);
 
     floatingEncoder.setPositionConversionFactor(Constants.Arm.Floating.kdistancePerRotation);
     floatingEncoder.setVelocityConversionFactor(Constants.Arm.Floating.kdistancePerRotation);
@@ -361,9 +362,9 @@ public class Arm extends SubsystemBase {
     double floatingMinOutput = SmartDashboard.getEntry("floatingMinOutput").getDouble(0);
     double floatingMaxOutput = SmartDashboard.getEntry("floatingMaxOutput").getDouble(0);
 
-    Constants.Arm.Anchor.ANCHOR_CONSTRAINTS =
+    TrapezoidProfile.Constraints ANCHOR_CONSTRAINTS =
         new TrapezoidProfile.Constraints(anchorMaxVEL, anchorMaxACCEL);
-    Constants.Arm.Floating.FLOATING_CONSTRAINTS =
+    TrapezoidProfile.Constraints FLOATING_CONSTRAINTS =
         new TrapezoidProfile.Constraints(floatingMaxVel, floatingMaxAccel);
 
     Constants.Arm.Anchor.kMinOutput = anchorMinOutput;
@@ -371,16 +372,25 @@ public class Arm extends SubsystemBase {
     Constants.Arm.Anchor.kMaxOutput = anchorMaxOutput;
     Constants.Arm.Floating.kMaxOutput = floatingMaxOutput;
 
+    this.anchorPIDController.setConstraints(ANCHOR_CONSTRAINTS);
     this.anchorPIDController.setPID(anchorKP, anchorKI, anchorKD);
-    setAnchorGoal(anchorSetpoint);
+    setAnchorGoal(anchorGoal);
 
     this.kG = customKG;
 
+    this.floatingPIDController.setConstraints(FLOATING_CONSTRAINTS);
     this.floatingPIDController.setPID(floatingKP, floatingKI, floatingKD);
-    setFloatingGoal(floatingSetpoint);
+    setFloatingGoal(floatingGoal);
 
     SmartDashboard.putNumber("anchorAngle", getAnchorAngle());
     SmartDashboard.putNumber("floatingAngle", getFloatingAngle());
+
+    SmartDashboard.putNumber("anchorVelR", getAnchorVelocity());
+    SmartDashboard.putNumber("floatingVelR", getFloatingVelocity());
+
+    SmartDashboard.putNumber("anchorVelMP", anchorPIDController.getVelocityError());
+    SmartDashboard.putNumber("floatingVelRMP", floatingPIDController.getVelocityError());
+    
 
     SmartDashboard.putNumber("anchorOutput", this.anchorMotor.getAppliedOutput());
     SmartDashboard.putNumber("floatingOutput", this.floatingMotor.getAppliedOutput());
@@ -398,14 +408,7 @@ public class Arm extends SubsystemBase {
     // SmartDashboard.putNumber("floatingAngleIK", angles.anchor - angles.floating);
 
     tuneControllers();
-    // SmartDashboard.putNumber("anchorAngle", getAnchorAngle());
-    // SmartDashboard.putNumber("floatingAngle", getFloatingAngle());
-    // SmartDashboard.putNumber("anchorSetpoint", getAnchorSetpoint());
-    // SmartDashboard.putNumber("floatingSetpoint", getFloatingSetpoint());
-    // SmartDashboard.putBoolean("anchorAtSetpoint", getAnchorAtSetpoint());
-    // SmartDashboard.putBoolean("floatingAtSetpoint", getFloatingAtSetpoint());
-    // SmartDashboard.putNumber("anchorPosERROR", anchorPIDController.getPositionError());
-    // SmartDashboard.putNumber("floatingPosERROR", floatingPIDController.getPositionError());
+
 
 
   }

@@ -16,11 +16,13 @@ public class RunArm extends CommandBase {
   @Override
   public void execute() {
     // PID
-    double anchorFF = arm.calculateFeedforwards().get(0, 0);
-    double floatingFF = arm.calculateFeedforwards().get(1, 0);
+    // double anchorFF = arm.calculateFeedforwards().get(0, 0);
+    // double floatingFF = arm.calculateFeedforwards().get(1, 0);
+    double anchorFF = arm.calculateAnchorFF();
+    double floatingFF = arm.calculateFloatingFF();
 
-    arm.setAnchorVoltage(anchorFF);
-    arm.setFloatingVoltage(floatingFF);
+    arm.setAnchorControllerReference(anchorFF);
+    arm.setFloatingControllerReference(floatingFF);
 
     // arm.setAnchorControllerReference(anchorFF);
     // arm.setFloatingControllerReference(floatingFF);

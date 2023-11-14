@@ -36,11 +36,11 @@ public final class Constants {
       public static final int kCurrentLimit = 50; // 40 - 60
       public static final double kGearRatio = 1;
       public static final double kNominalVoltage = 12.0;
-      public static final double kdistancePerRotation = 360;
+      public static final double kdistancePerRotation = (133 - 90) / (133 - 123.3345947265625);
 
-      public static final double kP = 0.01;
+      public static final double kP = 0.035; //0.01
       public static final double kI = 0;
-      public static final double kD = 0.00015;
+      public static final double kD = 0.002; //0.00015
       public static final int kPIDSlot = 0;
 
       public static final double kS = 0;
@@ -49,18 +49,18 @@ public final class Constants {
       public static final double kA = 0;
       public static ArmFeedforward ANCHOR_FEEDFORWARD = new ArmFeedforward(kS, kG, kV, kA);
 
-      public static final double maxVelocity = 10;
-      public static final double maxAcceleration = 10;
+      public static final double maxVelocity = 60;
+      public static final double maxAcceleration = 100;
       public static TrapezoidProfile.Constraints ANCHOR_CONSTRAINTS =
           new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
 
       public static final double kMinAngle = 40;
       public static final double kMaxAngle = 120; // ! TODO: is this too far, might be damaging to the hard stop
       public static final boolean kEnableSoftLimit = false;
-      public static final double kZeroPosition = 0;
+      public static final double kZeroPosition = (180-47);
 
-      public static double kMaxOutput = 0.2;
-      public static double kMinOutput = -0.05; //-0.1
+      public static double kMaxOutput = 1;
+      public static double kMinOutput = -1; //-0.1
 
       public static final double kLength = Units.inchesToMeters(34.5); // in
       public static final double kMass = 0;
@@ -79,9 +79,9 @@ public final class Constants {
       public static final double kGearRatio = 25;
       public static final double kdistancePerRotation = 360;
 
-      public static final double kP = 0.027;
+      public static final double kP = 0.02; //0.027
       public static final double kI = 0;
-      public static final double kD = 0.0001;
+      public static final double kD = 0.0008; //0.0001
       public static final int kPIDSlot = 0;
 
       public static final double kS = 0;
@@ -90,8 +90,8 @@ public final class Constants {
       public static final double kA = 0;
       public static ArmFeedforward FLOATING_FEEDFORWARD = new ArmFeedforward(kS, kG, kV, kA);
 
-      public static final double maxVelocity = 10;
-      public static final double maxAcceleration = 10;
+      public static final double maxVelocity = 60;
+      public static final double maxAcceleration = 180;
       public static TrapezoidProfile.Constraints FLOATING_CONSTRAINTS =
           new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
 
@@ -101,8 +101,8 @@ public final class Constants {
       public static final double kZeroPosition = 0;
 
 
-      public static double kMaxOutput = 0.3; // 0.26; //0.26
-      public static double kMinOutput = -0.15;
+      public static double kMaxOutput = 1; // 0.26; //0.26
+      public static double kMinOutput = -1;
       public static final double kLength = Units.inchesToMeters(35); // in
       public static final double kMass = 0;
       public static final double kMOI = 0;
