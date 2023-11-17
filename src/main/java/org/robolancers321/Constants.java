@@ -211,9 +211,9 @@ public final class Constants {
     // SHELFCONE(100, 15), 
     SHELFCONE(102, 7.4), // 102, 7.4
     SHELFCUBE(93.5, 5.5), // 93.5, 5.5
-    MID(86, 346-360), // 86, 346
-    HIGH(60.7, 19.7), // 60.7, 14.7
-    CONTRACT(110, -31);
+    MID(76, -25), // 86, 346
+    HIGH(40, 10), // 60.7, 14.7
+    CONTRACT(133, -50);
 
     public final double anchor;
 

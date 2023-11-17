@@ -138,8 +138,10 @@ public class Arm extends SubsystemBase {
     floatingPIDController.enableContinuousInput(0, 360);
     anchorPIDController.reset(getAnchorAngle());
     floatingPIDController.reset(getFloatingAngle());
-    anchorPIDController.setGoal(Constants.RawArmSetpoints.CONTRACT.anchor);
-    floatingPIDController.setGoal(Constants.RawArmSetpoints.CONTRACT.floating);
+
+    // changed inital setpoint to current reading rather than a setpoint from constants
+    anchorPIDController.setGoal(getAnchorAngle());
+    floatingPIDController.setGoal(getFloatingAngle());
   }
 
   public double getAnchorAngle() {
@@ -341,7 +343,7 @@ public class Arm extends SubsystemBase {
         SmartDashboard.getNumber("floatingMaxOutput", Constants.Arm.Floating.kMaxOutput));
   }
 
-  private void tuneControllers() {
+  public void tuneControllers() {
     double anchorGoal = SmartDashboard.getEntry("anchorGoal").getDouble(0);
     double anchorKP = SmartDashboard.getEntry("anchorKP").getDouble(0);
     double anchorKI = SmartDashboard.getEntry("anchorKI").getDouble(0);
@@ -382,9 +384,6 @@ public class Arm extends SubsystemBase {
     this.floatingPIDController.setPID(floatingKP, floatingKI, floatingKD);
     setFloatingGoal(floatingGoal);
 
-    SmartDashboard.putNumber("anchorAngle", getAnchorAngle());
-    SmartDashboard.putNumber("floatingAngle", getFloatingAngle());
-
     SmartDashboard.putNumber("anchorVelR", getAnchorVelocity());
     SmartDashboard.putNumber("floatingVelR", getFloatingVelocity());
 
@@ -407,9 +406,9 @@ public class Arm extends SubsystemBase {
     // SmartDashboard.putNumber("anchorAngleIK", angles.anchor);
     // SmartDashboard.putNumber("floatingAngleIK", angles.anchor - angles.floating);
 
-    tuneControllers();
+    SmartDashboard.putNumber("anchorAngle", getAnchorAngle());
+    SmartDashboard.putNumber("floatingAngle", getFloatingAngle());
 
-
-
+    // tuneControllers();
   }
 }
