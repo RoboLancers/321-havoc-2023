@@ -14,8 +14,8 @@ public class InverseArmKinematics {
     }
   }
 
-  private static final double anchorLength = Constants.Arm.Anchor.kAnchorLength;
-  private static final double floatLength = Constants.Arm.Floating.kFloatingLength;
+  private static final double anchorLength = Constants.Arm.Anchor.kLength;
+  private static final double floatLength = Constants.Arm.Floating.kLength;
 
   private static double calculateBeta(double y, double z) {
     double top =

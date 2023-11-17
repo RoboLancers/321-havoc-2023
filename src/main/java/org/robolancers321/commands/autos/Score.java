@@ -4,6 +4,8 @@ package org.robolancers321.commands.autos;
 import edu.wpi.first.wpilibj2.command.*;
 import org.robolancers321.Constants;
 import org.robolancers321.subsystems.arm.Arm;
+import org.robolancers321.subsystems.arm.commands.MoveArmSeparate;
+import org.robolancers321.subsystems.arm.commands.MoveArmSeparateBackwards;
 import org.robolancers321.subsystems.arm.commands.MoveToRawSetpoint;
 import org.robolancers321.subsystems.intake.Intake;
 
@@ -18,10 +20,11 @@ public class Score extends SequentialCommandGroup {
 
     addRequirements(intake);
     addCommands(
-        new MoveToRawSetpoint(arm, setpoint),
+        new MoveArmSeparate(arm, setpoint),
         new ParallelRaceGroup(
-            new WaitCommand(1.0),
+            new WaitCommand(3.0),
             new RunCommand(type == ItemType.CONE ? intake::outtakeSlow : intake::outtakeFast)),
-        new InstantCommand(intake::stopIntake));
+        new InstantCommand(intake::stopIntake),
+        new MoveArmSeparateBackwards(arm, Constants.RawArmSetpoints.CONTRACT));
   }
 }
