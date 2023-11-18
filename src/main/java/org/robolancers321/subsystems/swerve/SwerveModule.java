@@ -3,15 +3,19 @@ package org.robolancers321.subsystems.swerve;
 
 import static org.robolancers321.Constants.Swerve.*;
 
+import org.robolancers321.Robot;
+
 import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -29,7 +33,9 @@ public class SwerveModule {
   private final CANCoder turnAbsEncoder;
 
   private final SparkMaxPIDController driveController;
-  private final PIDController turnController;
+  private final SparkMaxPIDController turnController;
+
+  // private final Debouncer idleStateDebouncer;
 
   private SwerveModuleState desiredState;
 
@@ -44,8 +50,10 @@ public class SwerveModule {
     this.turnAbsEncoder = new CANCoder(config.kTurnEncoderId);
 
     this.driveController = driveMotor.getPIDController();
-    this.turnController = // turnMotor.getPIDController();
-      new PIDController(Turn.kP, Turn.kI, Turn.kD);
+    this.turnController = turnMotor.getPIDController();
+        // new PIDController(Turn.kP, Turn.kI, Turn.kD);
+
+    // this.idleStateDebouncer = new Debouncer(4 * Robot.kDefaultPeriod, DebounceType.kRising);
 
     configMotors(config.driveIsInverted, config.turnIsInverted);
     configEncoders(config.magOffsetDeg);
@@ -61,25 +69,33 @@ public class SwerveModule {
     SmartDashboard.putNumber(id + " currAngleDeg (relEncoder)", currState.angle.getDegrees());
 
     // TODO: check how well rel. & abs. match up, delete after
-    SmartDashboard.putNumber(id + " currAngleDeg (absEncoder)", turnAbsEncoder.getPosition());
+    SmartDashboard.putNumber(id + " currAngleDeg (absEncoder)", getAbsoluteEncoderAngle().getDegrees());
 
-    SmartDashboard.putNumber(id + " targVeloMetersPerSecond", desiredState != null ? desiredState.speedMetersPerSecond : 0);
-    SmartDashboard.putNumber(id + " targAngleDeg", desiredState != null ? desiredState.angle.getDegrees() : 0);
+    SmartDashboard.putNumber(id + " turn output", turnMotor.getAppliedOutput());
 
-    final double turnOutput = turnController.calculate(currState.angle.getRadians());
-    turnMotor.set(-MathUtil.clamp(turnOutput, -1.0, 1.0));
+    if(desiredState == null) return;
+    
+    SmartDashboard.putNumber(
+      id + " targVeloMetersPerSecond",
+      desiredState.speedMetersPerSecond);
+    SmartDashboard.putNumber(
+      id + " targAngleDeg", desiredState.angle.getDegrees());
+
+    // final double turnOutput = turnController.calculate(currState.angle.getRadians());
+    // turnMotor.set(-MathUtil.clamp(turnOutput, -1.0, 1.0));
   }
 
   public void setDesiredState(SwerveModuleState state) {
-    // could re-seed relative encoder on first idle (state == desiredState)
-
-    final var optimizedState =
-        SwerveModuleState.optimize(
-            state,
-            new Rotation2d(
-                // turnRelEncoder.getPosition()
-                turnAbsEncoder.getPosition()
-                ));
+    // could re-seed relative encoder on first idle (state == desiredState) w/ debouncer
+    // final var shouldReseed = idleStateDebouncer.calculate(state.equals(desiredState));
+    // SmartDashboard.putBoolean("modules should reseed", shouldReseed);
+    // if(shouldReseed) {
+    //   turnRelEncoder.setPosition(MathUtil.angleModulus(turnAbsEncoder.getPosition()));
+    // }
+    final var optimizedState = state;
+        // SwerveModuleState.optimize(
+        //     state,
+        //     getRelativeEncoderAngle());
 
     // addresses skew/drift at the module level
     // optimizedState.speedMetersPerSecond *=
@@ -87,8 +103,9 @@ public class SwerveModule {
 
     driveController.setReference(
         optimizedState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
-    turnController.setSetpoint(optimizedState.angle.getRadians());
-    // turnController.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
+    // turnController.setSetpoint(optimizedState.angle.getRadians());
+    turnController.setReference(
+        optimizedState.angle.getRadians(), ControlType.kPosition);
 
     this.desiredState = optimizedState;
   }
@@ -100,28 +117,31 @@ public class SwerveModule {
     this.driveController.setFF(f);
   }
 
-  public void setTurnPIDCoeffs(double p, double i, double d) {
+  public void setTurnPIDFCoeffs(double p, double i, double d, double f) {
     this.turnController.setP(p);
     this.turnController.setI(i);
     this.turnController.setD(d);
+    this.turnController.setFF(f);
   }
 
   public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(
         driveEncoder.getPosition(),
-        Rotation2d.fromRadians(
-            // turnRelEncoder.getPosition()
-            turnAbsEncoder.getPosition()
-            ));
+        getRelativeEncoderAngle());
   }
 
   public SwerveModuleState getState() {
     return new SwerveModuleState(
         driveEncoder.getVelocity(), //  * kRPMToMetersPerSecond,
-        Rotation2d.fromRadians(
-            // turnRelEncoder.getPosition()
-            turnAbsEncoder.getPosition()
-            ));
+        getRelativeEncoderAngle());
+  }
+
+  private Rotation2d getAbsoluteEncoderAngle() {
+    return Rotation2d.fromRadians(MathUtil.angleModulus(turnAbsEncoder.getAbsolutePosition()));
+  }
+
+  private Rotation2d getRelativeEncoderAngle() {
+    return Rotation2d.fromRadians(MathUtil.angleModulus(turnRelEncoder.getPosition()));
   }
 
   private void configMotors(boolean driveIsInverted, boolean turnIsInverted) {
@@ -139,6 +159,8 @@ public class SwerveModule {
 
     // lower CAN bus util for unused readings and keep pos/vel readings at default rate (50Hz)
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535);
+    driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20);
+    driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 65535);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 65535);
     driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 65535);
@@ -146,6 +168,7 @@ public class SwerveModule {
 
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 65535);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 65535);
+    driveMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 65535);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 65535);
     turnMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 65535);
@@ -159,19 +182,19 @@ public class SwerveModule {
     turnAbsEncoder.configAllSettings(config);
 
     turnRelEncoder.setPositionConversionFactor(kRotationsToRadians);
-    turnRelEncoder.setPosition(turnAbsEncoder.getAbsolutePosition());
+    turnRelEncoder.setPosition(getAbsoluteEncoderAngle().getRadians());
 
     driveEncoder.setVelocityConversionFactor(kRPMToMetersPerSecond);
   }
 
   private void configControllers() {
     setDrivePIDFCoeffs(Drive.kP, Drive.kI, Drive.kD, Drive.kFF);
-    setTurnPIDCoeffs(Turn.kP, Turn.kI, Turn.kD);
-    this.turnController.enableContinuousInput(-Math.PI, Math.PI);
+    setTurnPIDFCoeffs(Turn.kP, Turn.kI, Turn.kD, Turn.kFF);
+    // this.turnController.enableContinuousInput(-Math.PI, Math.PI);
 
-    // turnController.setPositionPIDWrappingEnabled(true);
-    // turnController.setPositionPIDWrappingMinInput(-Math.PI);
-    // turnController.setPositionPIDWrappingMaxInput(Math.PI);
+    turnController.setPositionPIDWrappingEnabled(true);
+    turnController.setPositionPIDWrappingMinInput(-Math.PI);
+    turnController.setPositionPIDWrappingMaxInput(Math.PI);
   }
 
   private void burnFlash() {

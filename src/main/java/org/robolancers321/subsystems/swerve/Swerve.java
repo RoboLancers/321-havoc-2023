@@ -2,6 +2,7 @@
 package org.robolancers321.subsystems.swerve;
 
 import static org.robolancers321.Constants.Swerve.*;
+import static java.util.Map.entry;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.PathConstraints;
@@ -25,12 +26,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-
 import org.robolancers321.util.SmartDashboardUtil;
 
 public class Swerve extends SubsystemBase {
@@ -40,9 +39,9 @@ public class Swerve extends SubsystemBase {
 
   private final Field2d field;
   private final SwerveDrivePoseEstimator poseEstimator;
-  
+
   private SwerveAutoBuilder autoBuilder;
-  private final Map<String, Command> pathEvents = new HashMap<String, Command>();
+  private final Map<String, Command> pathEvents;
 
   public Swerve(
       SwerveModule frontLeft,
@@ -64,24 +63,45 @@ public class Swerve extends SubsystemBase {
 
     SmartDashboard.putData("Field", this.field);
 
-    configureEvents();
+    pathEvents = Map.ofEntries( // might inject this from RobotContainer instead
+      entry("", runOnce(() -> {}))
+      // . . .
+    );
 
-    this.autoBuilder = new SwerveAutoBuilder(
-      this::getPose, this::resetPose,
-      kTranslationConstants, kRotationConstants,
-      this::drive, pathEvents, true, this);
+    this.autoBuilder =
+        new SwerveAutoBuilder(
+            this::getPose,
+            this::resetPose,
+            kTranslationConstants,
+            kRotationConstants,
+            this::drive,
+            pathEvents,
+            true,
+            this);
   }
 
   @Override
   public void periodic() {
     this.field.setRobotPose(poseEstimator.update(gyro.getRotation2d(), getModulePositions()));
-    modules.forEach(SwerveModule::periodic);
+
+    // final var kDriveP = SmartDashboardUtil.pollOrDefault("kDriveP", Drive.kP);
+    // final var kDriveI = SmartDashboardUtil.pollOrDefault("kDriveI", Drive.kI);
+    // final var kDriveD = SmartDashboardUtil.pollOrDefault("kDriveP", Drive.kD);
+    // final var kDriveFF = SmartDashboardUtil.pollOrDefault("kDriveFF", Drive.kFF);
+    // final var kTurnP = SmartDashboardUtil.pollOrDefault("kTurnP", Turn.kP);
+    // final var kTurnI = SmartDashboardUtil.pollOrDefault("kTurnI", Turn.kI);
+    // final var kTurnD = SmartDashboardUtil.pollOrDefault("kTurnD", Turn.kD);
+    // final var kTurnFF = SmartDashboardUtil.pollOrDefault("kTurnFF", Turn.kFF);
+
+    modules.forEach(module -> {
+      // module.setDrivePIDFCoeffs(
+      //   kDriveP, kDriveI, kDriveD, kDriveFF);
+      // module.setTurnPIDFCoeffs(
+      //   kTurnP, kTurnI, kTurnD, kTurnFF);
+      module.periodic();
+    });
 
     SmartDashboard.putNumber("yaw deg", gyro.getYaw());
-  }
-
-  public void configureEvents() {
-    // pathEvents.put(. . .);
   }
 
   // this is a terrible tuning method
@@ -93,14 +113,16 @@ public class Swerve extends SubsystemBase {
     final double kRotI = SmartDashboardUtil.pollOrDefault("kRotI", kRotationConstants.kI);
     final double kRotD = SmartDashboardUtil.pollOrDefault("kRotD", kRotationConstants.kD);
 
-    this.autoBuilder = new SwerveAutoBuilder(
-      this::getPose, this::resetPose,
-      new PIDConstants(kTransP, kTransI, kTransD),
-      new PIDConstants(kRotP, kRotI, kRotD),
-      this::drive,
-      pathEvents,
-      true,
-      this);
+    this.autoBuilder =
+        new SwerveAutoBuilder(
+            this::getPose,
+            this::resetPose,
+            new PIDConstants(kTransP, kTransI, kTransD),
+            new PIDConstants(kRotP, kRotI, kRotD),
+            this::drive,
+            pathEvents,
+            true,
+            this);
   }
 
   public CommandBase goTo(Supplier<Pose2d> pose, PathConstraints constraints) {
@@ -108,10 +130,11 @@ public class Swerve extends SubsystemBase {
   }
 
   public CommandBase goTo(Pose2d pose, PathConstraints constraints) {
-    return followPathWithEvents(PathPlanner.generatePath(
-      constraints,
-      PathPoint.fromCurrentHolonomicState(getPose(), getSpeeds()),
-      new PathPoint(pose.getTranslation(), Rotation2d.fromRadians(0), pose.getRotation())));
+    return followPathWithEvents(
+        PathPlanner.generatePath(
+            constraints,
+            PathPoint.fromCurrentHolonomicState(getPose(), getSpeeds()),
+            new PathPoint(pose.getTranslation(), Rotation2d.fromRadians(0), pose.getRotation())));
   }
 
   public CommandBase followPathWithEvents(String trajectoryName, PathConstraints constraints) {
@@ -124,7 +147,7 @@ public class Swerve extends SubsystemBase {
     dear sir Vincent, I am very appalled and offended that you denied my suggestive
     recommendation of naming the "autobuilder" into the "Vincent special". I give
     you fair warning that I am equipped with the ability to summon the one known
-    as little travis 
+    as little travis
      */
     return autoBuilder.followPathWithEvents(trajectory);
   }
@@ -133,10 +156,11 @@ public class Swerve extends SubsystemBase {
     // caching
     final var pos45 = new SwerveModuleState(0, Rotation2d.fromDegrees(45));
     final var neg45 = new SwerveModuleState(0, Rotation2d.fromDegrees(-45));
-    return run(() -> setModuleStates(
-      pos45, neg45,
-      neg45, pos45
-    ));
+    return run(
+        () ->
+            setModuleStates(
+                pos45, neg45,
+                neg45, pos45));
   }
 
   public CommandBase driveTeleop(
@@ -173,16 +197,21 @@ public class Swerve extends SubsystemBase {
         Collections.nCopies(modules.size(), state).toArray(new SwerveModuleState[modules.size()]));
   }
 
-  public void setModuleStates(SwerveModuleState frontLeft, SwerveModuleState frontRight,
-                              SwerveModuleState backLeft, SwerveModuleState backRight) {
-    setModuleStates(new SwerveModuleState[] {
-      frontLeft, frontRight,
-      backLeft, backRight
-    });
+  public void setModuleStates(
+      SwerveModuleState frontLeft,
+      SwerveModuleState frontRight,
+      SwerveModuleState backLeft,
+      SwerveModuleState backRight) {
+    setModuleStates(
+        new SwerveModuleState[] {
+          frontLeft, frontRight,
+          backLeft, backRight
+        });
   }
 
   private void setModuleStates(SwerveModuleState[] states) {
-    for (int i = 0; i < modules.size(); i++) modules.get(i).setDesiredState(states[i]);
+    final var numModules = modules.size();
+    for (int i = 0; i < numModules; i++) modules.get(i).setDesiredState(states[i]);
   }
 
   public Pose2d getPose() {
@@ -206,15 +235,14 @@ public class Swerve extends SubsystemBase {
       double inputThrottle, double inputStrafe, double inputOmega) {
     final double dt = 0.2;
     // change in angle over a period of dt assuming constant angular velocity
-    double angularDisplacement = inputOmega * dt;
-
+    final double angularDisplacement = inputOmega * dt;      
     // cache the relevant trig
-    double sin = Math.sin(0.5 * angularDisplacement);
-    double cos = Math.cos(0.5 * angularDisplacement);
+    final double sin = Math.sin(0.5 * angularDisplacement);
+    final double cos = Math.cos(0.5 * angularDisplacement);
 
     // apply pose exponential with small angle approximations
-    double resultantThrottle = inputStrafe * sin + inputThrottle * cos;
-    double resultantStrafe = inputStrafe * cos - inputThrottle * sin;
+    final double resultantThrottle = inputStrafe * sin + inputThrottle * cos;
+    final double resultantStrafe = inputStrafe * cos - inputThrottle * sin;
 
     return new Translation2d(resultantThrottle, resultantStrafe);
   }

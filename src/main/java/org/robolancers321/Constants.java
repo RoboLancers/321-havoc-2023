@@ -144,14 +144,15 @@ public final class Constants {
 
     public static final class OffseasonSwerve {
       public static final ModuleConfig frontLeft =
-          new ModuleConfig("FrontLeft", 19, 18, 3, 58.87907200420464, true, false);
+          new ModuleConfig("FrontLeft", 19, 18, 3, 58.87907200420464, true, true);
       public static final ModuleConfig frontRight =
-          new ModuleConfig("FrontRight", 11, 10, 1, -128.44749934250595, true, false);
+          new ModuleConfig("FrontRight", 11, 10, 1, -128.44749934250595, true, true);
       public static final ModuleConfig backLeft =
-          new ModuleConfig("BackLeft", 3, 2, 2, 107.41925934100429, true, false);
+          new ModuleConfig("BackLeft", 3, 2, 2, 107.41925934100429, true, true);
       public static final ModuleConfig backRight =
-          new ModuleConfig("BackRight", 5, 6, 4, -142.90441434353835, true, false);
+          new ModuleConfig("BackRight", 5, 6, 4, -142.90441434353835, true, true);
     }
+
     public static final class SummerSwerve {
       public static final ModuleConfig frontLeft =
           new ModuleConfig("FrontLeft", 2, 9, 10, -38.67179683527642, true, false);
@@ -162,7 +163,7 @@ public final class Constants {
       public static final ModuleConfig backRight =
           new ModuleConfig("BackRight", 6, 5, 12, -170.59535831198076, false, false);
     }
-    
+
     public static final CANCoderConfiguration kCANCoderConfig = new CANCoderConfiguration();
 
     static {
@@ -181,12 +182,12 @@ public final class Constants {
     public static final double kTurnGearRatio = 21.4285714; // 150 / 7
 
     public static final double kMaxSpeedMetersPerSecond = 4.0;
-        // Units.feetToMeters(16) / 1.0; // possibly scale down a bit
+    // Units.feetToMeters(16) / 1.0; // possibly scale down a bit
     public static final double kMaxOmegaRadiansPerSecond = 1.5 * Math.PI;
 
     public static final double kRPMToMetersPerSecond =
         2 * Math.PI * kWheelRadiusMeters / (kDriveGearRatio * 60.0);
-    public static final double kRotationsToRadians = 2 * Math.PI; // / kTurnGearRatio;
+    public static final double kRotationsToRadians = 2 * Math.PI / kTurnGearRatio;
 
     public static final SwerveDriveKinematics kSwerveKinematics =
         new SwerveDriveKinematics(
@@ -199,7 +200,8 @@ public final class Constants {
     public static final PIDConstants kTranslationConstants = new PIDConstants(0, 0, 0);
     public static final PIDConstants kRotationConstants = new PIDConstants(0, 0, 0);
 
-    public static final PathConstraints kDefaultPathConstraints = new PathConstraints(kMaxSpeedMetersPerSecond, 1.0);
+    public static final PathConstraints kDefaultPathConstraints =
+        new PathConstraints(kMaxSpeedMetersPerSecond, 1.0);
 
     public static final class Drive {
       public static final double kP = 0.0;
@@ -209,9 +211,9 @@ public final class Constants {
     }
 
     public static final class Turn {
-      public static final double kP = 0.4;
+      public static final double kP = 3.0;
       public static final double kI = 0.0;
-      public static final double kD = 0.002;
+      public static final double kD = 0.0;
       public static final double kFF = 0.0;
     }
   }
