@@ -2,6 +2,7 @@
 package org.robolancers321.commands.autos;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.robolancers321.Constants;
 import org.robolancers321.subsystems.arm.Arm;
@@ -33,17 +34,17 @@ public class Autos {
             this.swerve,
             this.intake,
             Constants.RawArmSetpoints.HIGH,
-            Score.ItemType.CONE);
+            Score.ItemType.CONE).withName("TaxiScoreHIGHCONE");;
     Command taxiConeMid =
         new TaxiAndScore(
-            this.arm, this.swerve, this.intake, Constants.RawArmSetpoints.MID, Score.ItemType.CONE);
+            this.arm, this.swerve, this.intake, Constants.RawArmSetpoints.MID, Score.ItemType.CONE).withName("TaxiScoreMIDCONE");;
     Command taxiConeShelf =
         new TaxiAndScore(
             this.arm,
             this.swerve,
             this.intake,
-            Constants.RawArmSetpoints.SHELF,
-            Score.ItemType.CONE);
+            Constants.RawArmSetpoints.SHELFCONE,
+            Score.ItemType.CONE).withName("TaxiScoreSHELFCONE");
 
     Command taxiCubeHigh =
         new TaxiAndScore(
@@ -51,17 +52,17 @@ public class Autos {
             this.swerve,
             this.intake,
             Constants.RawArmSetpoints.HIGH,
-            Score.ItemType.CUBE);
+            Score.ItemType.CUBE).withName("TaxiScoreHIGHCUBE");
     Command taxiCubeMid =
         new TaxiAndScore(
-            this.arm, this.swerve, this.intake, Constants.RawArmSetpoints.MID, Score.ItemType.CUBE);
+            this.arm, this.swerve, this.intake, Constants.RawArmSetpoints.MID, Score.ItemType.CUBE).withName("TaxiScoreMIDCUBE");
     Command taxiCubeShelf =
         new TaxiAndScore(
             this.arm,
             this.swerve,
             this.intake,
-            Constants.RawArmSetpoints.SHELF,
-            Score.ItemType.CUBE);
+            Constants.RawArmSetpoints.SHELFCUBE,
+            Score.ItemType.CUBE).withName("TaxiScoreSHELFCUBE");
 
     this.autoChooser.addOption(taxiCubeShelf.getName(), taxiCubeShelf);
     this.autoChooser.addOption(taxiCubeMid.getName(), taxiCubeMid);
@@ -70,6 +71,7 @@ public class Autos {
     this.autoChooser.addOption(taxiConeShelf.getName(), taxiConeShelf);
     this.autoChooser.addOption(taxiConeMid.getName(), taxiConeMid);
     this.autoChooser.addOption(taxiConeHigh.getName(), taxiConeHigh);
+    SmartDashboard.putData(autoChooser);
   }
 
   public SendableChooser<Command> getAutoChooser() {

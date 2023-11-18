@@ -19,16 +19,17 @@ public class TaxiAndScore extends SequentialCommandGroup {
     addRequirements(swerve);
 
     addCommands(
+        new Score(arm, intake, setpoint, type),
         new ParallelRaceGroup(
-            new WaitCommand(2.0),
+            new WaitCommand(2.5),
             new RunCommand(
                 () -> {
-                  swerve.drive(0.5, 0, 0, true);
+                  swerve.drive(-0.5, 0, 0, true);
                 })),
         new InstantCommand(
             () -> {
               swerve.drive(0, 0, 0, true);
-            }),
-        new Score(arm, intake, setpoint, type));
+            })
+        );
   }
 }
