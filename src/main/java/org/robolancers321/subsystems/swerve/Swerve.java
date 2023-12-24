@@ -1,8 +1,8 @@
 /* (C) Robolancers 2024 */
 package org.robolancers321.subsystems.swerve;
 
-import static org.robolancers321.Constants.Swerve.*;
 import static java.util.Map.entry;
+import static org.robolancers321.Constants.Swerve.*;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.PathConstraints;
@@ -15,6 +15,7 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -25,11 +26,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
 import org.robolancers321.util.SmartDashboardUtil;
 
 public class Swerve extends SubsystemBase {
@@ -63,10 +66,11 @@ public class Swerve extends SubsystemBase {
 
     SmartDashboard.putData("Field", this.field);
 
-    pathEvents = Map.ofEntries( // might inject this from RobotContainer instead
-      entry("", runOnce(() -> {}))
-      // . . .
-    );
+    this.pathEvents =
+        Map.ofEntries( // might inject this from RobotContainer instead
+            entry("", runOnce(() -> {}))
+            // . . .
+            );
 
     this.autoBuilder =
         new SwerveAutoBuilder(
@@ -93,15 +97,21 @@ public class Swerve extends SubsystemBase {
     // final var kTurnD = SmartDashboardUtil.pollOrDefault("kTurnD", Turn.kD);
     // final var kTurnFF = SmartDashboardUtil.pollOrDefault("kTurnFF", Turn.kFF);
 
-    modules.forEach(module -> {
-      // module.setDrivePIDFCoeffs(
-      //   kDriveP, kDriveI, kDriveD, kDriveFF);
-      // module.setTurnPIDFCoeffs(
-      //   kTurnP, kTurnI, kTurnD, kTurnFF);
-      module.periodic();
-    });
+    modules.forEach(
+        module -> {
+          // module.setDrivePIDFCoeffs(
+          //   kDriveP, kDriveI, kDriveD, kDriveFF);
+          // module.setTurnPIDFCoeffs(
+          //   kTurnP, kTurnI, kTurnD, kTurnFF);
+          module.periodic();
+        });
 
     SmartDashboard.putNumber("yaw deg", gyro.getYaw());
+  }
+
+  @Override
+  public void simulationPeriodic() {
+
   }
 
   // this is a terrible tuning method
@@ -125,16 +135,22 @@ public class Swerve extends SubsystemBase {
             this);
   }
 
-  public CommandBase goTo(Supplier<Pose2d> pose, PathConstraints constraints) {
-    return goTo(pose.get(), constraints);
+  public CommandBase goTo(Supplier<Pose2d> pose, PathConstraints constraints, boolean fieldRelative) {
+    return goTo(pose.get(), constraints, fieldRelative);
   }
 
-  public CommandBase goTo(Pose2d pose, PathConstraints constraints) {
+  public CommandBase goTo(Pose2d pose, PathConstraints constraints, boolean fieldRelative) {
+    final var currPose = getPose();
     return followPathWithEvents(
         PathPlanner.generatePath(
             constraints,
-            PathPoint.fromCurrentHolonomicState(getPose(), getSpeeds()),
-            new PathPoint(pose.getTranslation(), Rotation2d.fromRadians(0), pose.getRotation())));
+            PathPoint.fromCurrentHolonomicState(currPose, getSpeeds()),
+            new PathPoint((
+              fieldRelative
+                ? pose
+                : currPose.plus( // allows passed in pose to be robot-relative
+                    new Transform2d(pose.getTranslation(), Rotation2d.fromRadians(0)))).getTranslation(),
+              Rotation2d.fromRadians(0), pose.getRotation())));
   }
 
   public CommandBase followPathWithEvents(String trajectoryName, PathConstraints constraints) {
@@ -149,9 +165,14 @@ public class Swerve extends SubsystemBase {
     you fair warning that I am equipped with the ability to summon the one known
     as little travis
      */
+
+    this.field.getRobotObject().setPoses(trajectory.getStates().stream().map(s -> s.poseMeters).toList());
     return autoBuilder.followPathWithEvents(trajectory);
   }
 
+  /**
+   * Overrides the modules' angle setpoints so that the wheels form an X.
+   */
   public CommandBase lockModules() {
     // caching
     final var pos45 = new SwerveModuleState(0, Rotation2d.fromDegrees(45));
@@ -235,7 +256,7 @@ public class Swerve extends SubsystemBase {
       double inputThrottle, double inputStrafe, double inputOmega) {
     final double dt = 0.2;
     // change in angle over a period of dt assuming constant angular velocity
-    final double angularDisplacement = inputOmega * dt;      
+    final double angularDisplacement = inputOmega * dt;
     // cache the relevant trig
     final double sin = Math.sin(0.5 * angularDisplacement);
     final double cos = Math.cos(0.5 * angularDisplacement);

@@ -30,39 +30,55 @@ public class Autos {
   private void configureAutos() {
     Command taxiConeHigh =
         new TaxiAndScore(
-            this.arm,
-            this.swerve,
-            this.intake,
-            Constants.RawArmSetpoints.HIGH,
-            Score.ItemType.CONE).withName("TaxiScoreHIGHCONE");;
+                this.arm,
+                this.swerve,
+                this.intake,
+                Constants.RawArmSetpoints.HIGH,
+                Score.ItemType.CONE)
+            .withName("TaxiScoreHIGHCONE");
+    ;
     Command taxiConeMid =
         new TaxiAndScore(
-            this.arm, this.swerve, this.intake, Constants.RawArmSetpoints.MID, Score.ItemType.CONE).withName("TaxiScoreMIDCONE");;
+                this.arm,
+                this.swerve,
+                this.intake,
+                Constants.RawArmSetpoints.MID,
+                Score.ItemType.CONE)
+            .withName("TaxiScoreMIDCONE");
+    ;
     Command taxiConeShelf =
         new TaxiAndScore(
-            this.arm,
-            this.swerve,
-            this.intake,
-            Constants.RawArmSetpoints.SHELFCONE,
-            Score.ItemType.CONE).withName("TaxiScoreSHELFCONE");
+                this.arm,
+                this.swerve,
+                this.intake,
+                Constants.RawArmSetpoints.SHELFCONE,
+                Score.ItemType.CONE)
+            .withName("TaxiScoreSHELFCONE");
 
     Command taxiCubeHigh =
         new TaxiAndScore(
-            this.arm,
-            this.swerve,
-            this.intake,
-            Constants.RawArmSetpoints.HIGH,
-            Score.ItemType.CUBE).withName("TaxiScoreHIGHCUBE");
+                this.arm,
+                this.swerve,
+                this.intake,
+                Constants.RawArmSetpoints.HIGH,
+                Score.ItemType.CUBE)
+            .withName("TaxiScoreHIGHCUBE");
     Command taxiCubeMid =
         new TaxiAndScore(
-            this.arm, this.swerve, this.intake, Constants.RawArmSetpoints.MID, Score.ItemType.CUBE).withName("TaxiScoreMIDCUBE");
+                this.arm,
+                this.swerve,
+                this.intake,
+                Constants.RawArmSetpoints.MID,
+                Score.ItemType.CUBE)
+            .withName("TaxiScoreMIDCUBE");
     Command taxiCubeShelf =
         new TaxiAndScore(
-            this.arm,
-            this.swerve,
-            this.intake,
-            Constants.RawArmSetpoints.SHELFCUBE,
-            Score.ItemType.CUBE).withName("TaxiScoreSHELFCUBE");
+                this.arm,
+                this.swerve,
+                this.intake,
+                Constants.RawArmSetpoints.SHELFCUBE,
+                Score.ItemType.CUBE)
+            .withName("TaxiScoreSHELFCUBE");
 
     this.autoChooser.addOption(taxiCubeShelf.getName(), taxiCubeShelf);
     this.autoChooser.addOption(taxiCubeMid.getName(), taxiCubeMid);

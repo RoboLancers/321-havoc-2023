@@ -3,19 +3,14 @@ package org.robolancers321.subsystems.swerve;
 
 import static org.robolancers321.Constants.Swerve.*;
 
-import org.robolancers321.Robot;
-
 import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.CANSparkMax.ControlType;
-
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -51,7 +46,7 @@ public class SwerveModule {
 
     this.driveController = driveMotor.getPIDController();
     this.turnController = turnMotor.getPIDController();
-        // new PIDController(Turn.kP, Turn.kI, Turn.kD);
+    // new PIDController(Turn.kP, Turn.kI, Turn.kD);
 
     // this.idleStateDebouncer = new Debouncer(4 * Robot.kDefaultPeriod, DebounceType.kRising);
 
@@ -69,17 +64,15 @@ public class SwerveModule {
     SmartDashboard.putNumber(id + " currAngleDeg (relEncoder)", currState.angle.getDegrees());
 
     // TODO: check how well rel. & abs. match up, delete after
-    SmartDashboard.putNumber(id + " currAngleDeg (absEncoder)", getAbsoluteEncoderAngle().getDegrees());
+    SmartDashboard.putNumber(
+        id + " currAngleDeg (absEncoder)", getAbsoluteEncoderAngle().getDegrees());
 
     SmartDashboard.putNumber(id + " turn output", turnMotor.getAppliedOutput());
 
-    if(desiredState == null) return;
-    
-    SmartDashboard.putNumber(
-      id + " targVeloMetersPerSecond",
-      desiredState.speedMetersPerSecond);
-    SmartDashboard.putNumber(
-      id + " targAngleDeg", desiredState.angle.getDegrees());
+    if (desiredState == null) return;
+
+    SmartDashboard.putNumber(id + " targVeloMetersPerSecond", desiredState.speedMetersPerSecond);
+    SmartDashboard.putNumber(id + " targAngleDeg", desiredState.angle.getDegrees());
 
     // final double turnOutput = turnController.calculate(currState.angle.getRadians());
     // turnMotor.set(-MathUtil.clamp(turnOutput, -1.0, 1.0));
@@ -93,9 +86,9 @@ public class SwerveModule {
     //   turnRelEncoder.setPosition(MathUtil.angleModulus(turnAbsEncoder.getPosition()));
     // }
     final var optimizedState = state;
-        // SwerveModuleState.optimize(
-        //     state,
-        //     getRelativeEncoderAngle());
+    // SwerveModuleState.optimize(
+    //     state,
+    //     getRelativeEncoderAngle());
 
     // addresses skew/drift at the module level
     // optimizedState.speedMetersPerSecond *=
@@ -104,8 +97,7 @@ public class SwerveModule {
     driveController.setReference(
         optimizedState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
     // turnController.setSetpoint(optimizedState.angle.getRadians());
-    turnController.setReference(
-        optimizedState.angle.getRadians(), ControlType.kPosition);
+    turnController.setReference(optimizedState.angle.getRadians(), ControlType.kPosition);
 
     this.desiredState = optimizedState;
   }
@@ -125,9 +117,7 @@ public class SwerveModule {
   }
 
   public SwerveModulePosition getPosition() {
-    return new SwerveModulePosition(
-        driveEncoder.getPosition(),
-        getRelativeEncoderAngle());
+    return new SwerveModulePosition(driveEncoder.getPosition(), getRelativeEncoderAngle());
   }
 
   public SwerveModuleState getState() {

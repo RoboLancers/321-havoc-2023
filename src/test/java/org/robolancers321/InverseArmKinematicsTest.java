@@ -1,5 +1,5 @@
-// /* (C) Robolancers 2024 */
-// package org.robolancers321;
+/* (C) Robolancers 2024 */
+package org.robolancers321;
 
 // import static org.junit.jupiter.api.Assertions.assertEquals;
 

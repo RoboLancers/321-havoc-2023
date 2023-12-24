@@ -6,7 +6,6 @@ import org.robolancers321.Constants;
 import org.robolancers321.subsystems.arm.Arm;
 import org.robolancers321.subsystems.arm.commands.MoveArmSeparate;
 import org.robolancers321.subsystems.arm.commands.MoveArmSeparateBackwards;
-import org.robolancers321.subsystems.arm.commands.MoveToRawSetpoint;
 import org.robolancers321.subsystems.intake.Intake;
 
 public class Score extends SequentialCommandGroup {

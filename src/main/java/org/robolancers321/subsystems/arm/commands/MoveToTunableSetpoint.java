@@ -1,5 +1,5 @@
-// /* (C) Robolancers 2024 */
-// package org.robolancers321.subsystems.arm.commands;
+/* (C) Robolancers 2024 */
+package org.robolancers321.subsystems.arm.commands;
 
 // import edu.wpi.first.wpilibj2.command.CommandBase;
 // import java.util.function.DoubleSupplier;
@@ -24,7 +24,8 @@
 //   @Override
 //   public void initialize() {
 //     InverseArmKinematics.Output currentSetpointAngles =
-//         InverseArmKinematics.calculate(this.ySupplier.getAsDouble(), this.zSupplier.getAsDouble());
+//         InverseArmKinematics.calculate(this.ySupplier.getAsDouble(),
+// this.zSupplier.getAsDouble());
 
 //     arm.setAnchorSetpoint(currentSetpointAngles.anchor);
 //     arm.setFloatingSetpoint(currentSetpointAngles.floating);
@@ -33,7 +34,8 @@
 //   @Override
 //   public boolean isFinished() {
 //     InverseArmKinematics.Output currentSetpointAngles =
-//         InverseArmKinematics.calculate(this.ySupplier.getAsDouble(), this.zSupplier.getAsDouble());
+//         InverseArmKinematics.calculate(this.ySupplier.getAsDouble(),
+// this.zSupplier.getAsDouble());
 
 //     return (MathUtils.epsilonEquals(
 //             currentSetpointAngles.anchor, arm.getAnchorAngle(), Constants.Arm.Anchor.kTolerance)

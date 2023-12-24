@@ -1,10 +1,4 @@
-// Copyright (c) 2023 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file at
-// the root directory of this project.
-
+/* (C) Robolancers 2024 */
 package org.robolancers321.subsystems.arm;
 
 import edu.wpi.first.math.Matrix;
@@ -16,12 +10,12 @@ import edu.wpi.first.math.numbers.N2;
 /**
  * Calculates feedforward voltages for a double jointed arm.
  *
- * <p>https://www.chiefdelphi.com/t/whitepaper-two-jointed-arm-dynamics/423060
- * Adapted from 6328 ArmDynamics class
+ * <p>https://www.chiefdelphi.com/t/whitepaper-two-jointed-arm-dynamics/423060 Adapted from 6328
+ * ArmDynamics class
  */
 public class DJArmFeedforward {
   private static final double g = 9.80665;
-  
+
   private final JointConfig Joint_Lower;
   private final JointConfig Joint_Upper;
 
@@ -46,14 +40,14 @@ public class DJArmFeedforward {
         Joint_Upper.motor.getVoltage(torque.get(1, 0), velocity.get(1, 0)));
   }
 
-
   private Matrix<N2, N2> M(Vector<N2> position) {
     var M = new Matrix<>(N2.instance, N2.instance);
     M.set(
         0,
         0,
         Joint_Lower.mass * Math.pow(Joint_Lower.cgRadius, 2.0)
-            + Joint_Upper.mass * (Math.pow(Joint_Lower.length, 2.0) + Math.pow(Joint_Upper.cgRadius, 2.0))
+            + Joint_Upper.mass
+                * (Math.pow(Joint_Lower.length, 2.0) + Math.pow(Joint_Upper.cgRadius, 2.0))
             + Joint_Lower.moi
             + Joint_Upper.moi
             + 2
@@ -66,13 +60,19 @@ public class DJArmFeedforward {
         0,
         Joint_Upper.mass * Math.pow(Joint_Upper.cgRadius, 2.0)
             + Joint_Upper.moi
-            + Joint_Upper.mass * Joint_Lower.length * Joint_Upper.cgRadius * Math.cos(position.get(1, 0)));
+            + Joint_Upper.mass
+                * Joint_Lower.length
+                * Joint_Upper.cgRadius
+                * Math.cos(position.get(1, 0)));
     M.set(
         0,
         1,
         Joint_Upper.mass * Math.pow(Joint_Upper.cgRadius, 2.0)
             + Joint_Upper.moi
-            + Joint_Upper.mass * Joint_Lower.length * Joint_Upper.cgRadius * Math.cos(position.get(1, 0)));
+            + Joint_Upper.mass
+                * Joint_Lower.length
+                * Joint_Upper.cgRadius
+                * Math.cos(position.get(1, 0)));
     M.set(1, 1, Joint_Upper.mass * Math.pow(Joint_Upper.cgRadius, 2.0) + Joint_Upper.moi);
     return M;
   }
@@ -121,8 +121,10 @@ public class DJArmFeedforward {
     Tg.set(
         1,
         0,
-        Joint_Upper.mass * Joint_Upper.cgRadius * g * Math.cos(position.get(0, 0) + position.get(1, 0)));
+        Joint_Upper.mass
+            * Joint_Upper.cgRadius
+            * g
+            * Math.cos(position.get(0, 0) + position.get(1, 0)));
     return Tg;
   }
-
 }

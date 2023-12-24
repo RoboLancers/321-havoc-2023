@@ -3,27 +3,22 @@ package org.robolancers321.subsystems.arm;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.robolancers321.Constants;
-import org.robolancers321.Constants.RawArmSetpoints;
 
 public class Arm extends SubsystemBase {
   private final CANSparkMax anchorMotor;
@@ -53,26 +48,36 @@ public class Arm extends SubsystemBase {
     this.anchorEncoder = anchorMotor.getEncoder();
     this.anchorPIDController =
         new ProfiledPIDController(
-            Constants.Arm.Anchor.kP, Constants.Arm.Anchor.kI, Constants.Arm.Anchor.kD, Constants.Arm.Anchor.ANCHOR_CONSTRAINTS);
+            Constants.Arm.Anchor.kP,
+            Constants.Arm.Anchor.kI,
+            Constants.Arm.Anchor.kD,
+            Constants.Arm.Anchor.ANCHOR_CONSTRAINTS);
 
     this.floatingMotor =
         new CANSparkMax(Constants.Arm.Floating.kFloatingPort, MotorType.kBrushless);
     this.floatingEncoder = floatingMotor.getAbsoluteEncoder(Type.kDutyCycle);
     this.floatingPIDController =
         new ProfiledPIDController(
-            Constants.Arm.Floating.kP, Constants.Arm.Floating.kI, Constants.Arm.Floating.kD, Constants.Arm.Floating.FLOATING_CONSTRAINTS);
+            Constants.Arm.Floating.kP,
+            Constants.Arm.Floating.kI,
+            Constants.Arm.Floating.kD,
+            Constants.Arm.Floating.FLOATING_CONSTRAINTS);
 
-    this.anchorConfig = new JointConfig(
-      Constants.Arm.Anchor.kMass, 
-      Constants.Arm.Anchor.kLength, 
-      Constants.Arm.Anchor.kMOI, Constants.Arm.Anchor.kCGRadius, 
-      DCMotor.getNEO(1).withReduction(Constants.Arm.Anchor.kGearRatio));
+    this.anchorConfig =
+        new JointConfig(
+            Constants.Arm.Anchor.kMass,
+            Constants.Arm.Anchor.kLength,
+            Constants.Arm.Anchor.kMOI,
+            Constants.Arm.Anchor.kCGRadius,
+            DCMotor.getNEO(1).withReduction(Constants.Arm.Anchor.kGearRatio));
 
-    this.floatingConfig = new JointConfig(
-      Constants.Arm.Floating.kMass, 
-      Constants.Arm.Floating.kLength, 
-      Constants.Arm.Floating.kMOI, Constants.Arm.Floating.kCGRadius, 
-      DCMotor.getNEO(1).withReduction(Constants.Arm.Floating.kGearRatio));
+    this.floatingConfig =
+        new JointConfig(
+            Constants.Arm.Floating.kMass,
+            Constants.Arm.Floating.kLength,
+            Constants.Arm.Floating.kMOI,
+            Constants.Arm.Floating.kCGRadius,
+            DCMotor.getNEO(1).withReduction(Constants.Arm.Floating.kGearRatio));
 
     this.armFeedforward = new DJArmFeedforward(anchorConfig, floatingConfig);
 
@@ -168,11 +173,11 @@ public class Arm extends SubsystemBase {
     return floatingPIDController.atSetpoint();
   }
 
-  public double getAnchorSetpoint(){
+  public double getAnchorSetpoint() {
     return anchorPIDController.getSetpoint().position;
   }
 
-  public double getFloatingSetpoint(){
+  public double getFloatingSetpoint() {
     return floatingPIDController.getSetpoint().position;
   }
 
@@ -200,16 +205,15 @@ public class Arm extends SubsystemBase {
 
   public void setFloatingGoal(double goal) {
     double clampSetpoint =
-        MathUtil.clamp(
-            goal, Constants.Arm.Floating.kMinAngle, Constants.Arm.Floating.kMaxAngle);
+        MathUtil.clamp(goal, Constants.Arm.Floating.kMinAngle, Constants.Arm.Floating.kMaxAngle);
     floatingPIDController.setGoal(clampSetpoint);
   }
 
-  public void setAnchorVoltage(double voltage){
+  public void setAnchorVoltage(double voltage) {
     anchorMotor.setVoltage(voltage);
   }
 
-  public void setFloatingVoltage(double voltage){
+  public void setFloatingVoltage(double voltage) {
     floatingMotor.setVoltage(voltage);
   }
 
@@ -247,11 +251,9 @@ public class Arm extends SubsystemBase {
     // }
     // return alpha > (85 * Math.PI / 180.0) ? 0 : anchorFF;
 
-
-    if(alpha > Math.toRadians(110)){
+    if (alpha > Math.toRadians(110)) {
       return anchorFF;
-    }
-    else{
+    } else {
       return alpha > Math.toRadians(90) ? 0 : anchorFF;
     }
     // if(this.getAnchorSetpoint() > 90){
@@ -294,11 +296,9 @@ public class Arm extends SubsystemBase {
 
   private void initTuneControllers() {
     SmartDashboard.putNumber(
-        "anchorGoal",
-        SmartDashboard.getNumber("anchorSetpoint", getAnchorGoal()));
+        "anchorGoal", SmartDashboard.getNumber("anchorSetpoint", getAnchorGoal()));
     SmartDashboard.putNumber(
-        "floatingGoal",
-        SmartDashboard.getNumber("floatingSetpoint", getFloatingGoal()));
+        "floatingGoal", SmartDashboard.getNumber("floatingSetpoint", getFloatingGoal()));
     SmartDashboard.putNumber(
         "anchorMaxVEL", SmartDashboard.getNumber("anchorMaxVEL", Constants.Arm.Anchor.maxVelocity));
     SmartDashboard.putNumber(
@@ -389,7 +389,6 @@ public class Arm extends SubsystemBase {
 
     SmartDashboard.putNumber("anchorVelMP", anchorPIDController.getVelocityError());
     SmartDashboard.putNumber("floatingVelRMP", floatingPIDController.getVelocityError());
-    
 
     SmartDashboard.putNumber("anchorOutput", this.anchorMotor.getAppliedOutput());
     SmartDashboard.putNumber("floatingOutput", this.floatingMotor.getAppliedOutput());
