@@ -35,4 +35,22 @@ public class ChassisSpeedsUtil {
         speeds.omegaRadiansPerSecond,
         dtSeconds);
   }
+
+  /* trans, rot, slow
+   * Case 1: false, false, false (normal speed robot-centric)
+   * Case 2: true, true, true (heading control & slow field centric drive)
+   * Case 3: true, false, true (no heading control & slow field centric drive)
+   * Case 4: false, false, true (slow robot centric drive)
+   * Case 5: true, false, false (no heading control & normal speed field centric drive)
+   * Case 6: false, true, false (heading control & normal speed robot centric drive)
+   * 
+   * expressed as:
+   * translateFieldCentric(throttle, strafe, heading).and(rotateRobotCentric(turn))[.get() | .slow()]
+   * rotateRobotCentric(turn).and(translateFieldCentric(throttle, strafe, heading))[.get() | .slow()]
+   * 
+   * drive(
+   *    slow(translateFieldCentric()),
+   *    rotateRobotCentric()
+   * )
+   */
 }

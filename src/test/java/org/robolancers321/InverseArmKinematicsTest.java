@@ -1,10 +1,9 @@
-// /* (C) Robolancers 2024 */
-// package org.robolancers321;
+/* (C) Robolancers 2024 */
+package org.robolancers321;
 
 // import static org.junit.jupiter.api.Assertions.assertEquals;
 
-// import org.junit.jupiter.api.Test;
-// import org.robolancers321.subsystems.arm.InverseArmKinematics;
+// // import org.robolancers321.subsystems.arm.InverseArmKinematics;
 
 // class InverseArmKinematicsTest {
 //   // unit: inches

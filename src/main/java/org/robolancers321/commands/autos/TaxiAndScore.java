@@ -29,7 +29,6 @@ public class TaxiAndScore extends SequentialCommandGroup {
         new InstantCommand(
             () -> {
               swerve.drive(0, 0, 0, true);
-            })
-        );
+            }));
   }
 }

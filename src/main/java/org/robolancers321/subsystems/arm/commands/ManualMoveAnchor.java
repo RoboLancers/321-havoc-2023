@@ -14,7 +14,6 @@ public class ManualMoveAnchor extends CommandBase {
   public ManualMoveAnchor(Arm arm, boolean reverse) {
     this.arm = arm;
     this.reverse = reverse;
-
   }
 
   @Override

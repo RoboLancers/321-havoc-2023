@@ -1,11 +1,7 @@
 /* (C) Robolancers 2024 */
 package org.robolancers321.subsystems.arm.commands;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-
-import org.robolancers321.Constants;
 import org.robolancers321.subsystems.arm.Arm;
 
 public class ManualMoveFloating extends CommandBase {
@@ -47,8 +43,7 @@ public class ManualMoveFloating extends CommandBase {
   }
 
   @Override
-  public void end(boolean interrupted){
+  public void end(boolean interrupted) {
     // arm.setFloatingSetpoint(arm.getFloatingAngle());
   }
 }
-
